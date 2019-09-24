@@ -14,8 +14,6 @@ v<-getNMDinfo("v")
 v <- v[v$platformNumber %in% arg2018$ReadBioticXML_BioticData_fishstation.txt$catchplatform,]
 v$REGM <- gsub(pattern = "-", "", v$Norwegian_Fisheries_Register)
 
-her2018$ReadBioticXML_BioticData_fishstation.txt <- merge(her2018$ReadBioticXML_BioticData_fishstation.txt, v[,c("platformNumber", "REGM")], by.x="catchplatform", by.y="platformNumber", all.x=T)
-
 #landings
 l<-locale()
 l$decimal_mark <- "."
@@ -60,6 +58,15 @@ agesprlg <- agesprlg[order(as.integer(agesprlg$sampletype)),]
 
 # export data
 # 
+
+#estimate probabilities from registered weights (actual probabilities was set on reported weight during haul and set quoate for the fishery and a total sampling capacity of 200? catches)
+
+herringSelectionProb2018 <- aggregate(list(catch_kg=her2018$ReadBioticXML_BioticData_catchsample.txt$catchweight), by=list(platform=her2018$ReadBioticXML_BioticData_catchsample.txt$platform, startyear=her2018$ReadBioticXML_BioticData_catchsample.txt$startyear, missiontype=her2018$ReadBioticXML_BioticData_catchsample.txt$missiontype, missionnumber=her2018$ReadBioticXML_BioticData_catchsample.txt$missionnumber, serialnumber=her2018$ReadBioticXML_BioticData_catchsample.txt$serialnumber), FUN=sum)
+herringSelectionProb2018$selectionprobability<-200*herringSelectionProb2018$catch_kg/sum(landings$Rundvekt)
+if (nrow(herringSelectionProb2018)!=nrow(her2018$ReadBioticXML_BioticData_fishstation.txt)){
+  stop("Error in merging selection probabilities")
+}
+
 # Hierarchy 13: haul
 # construct: 
 source("metierannotation.R")
