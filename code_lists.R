@@ -46,3 +46,6 @@ codelist$RS_BiologicalMeasurementType$weight <- "Weight"
 codelist$RS_MethodForMeasurement <- list()
 codelist$RS_MethodForMeasurement$otolith <- "Otolith"
 codelist$RS_MethodForMeasurement$scale <- "Scale"
+codelist$RS_Sex <- list()
+codelist$RS_Sex$male <- "M"
+codelist$RS_Sex$female <- "F"

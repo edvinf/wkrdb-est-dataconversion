@@ -84,6 +84,22 @@ getRDBESagingMethod <- function(NMDreferenceAginstructure){
   if (NMDreferenceAginstructure=="1"){
     return(codelist$RS_MethodForMeasurement$scale)
   }
+  else{
+    stop(paste("NMD age structure code not supported", NMDreferenceAginstructure))
+  }
+}
+
+#' Converts sex codes from NMD reference (NMD biotic) to RDBES RS_Sex codes
+getSex <-function(NMDreferenceSex){
+  if (NMDreferenceSex==1){
+    return(codelist$RS_Sex$female)
+  }
+  if (NMDreferenceSex==2){
+    return(codelist$RS_Sex$male)
+  }
+  else{
+    stop(paste("NMD sex code not supported", NMDreferenceSex))
+  }
 }
 
 #' Export SA lines for RDBES
@@ -102,7 +118,7 @@ exportSA <- function(stream, catchsamples, nmdbiotic, lower_hierarchy, catchfrac
       stop("Conversion factors not implemented.")
       #when implementing conversion, check if it should also be applied to total weights
     }
-
+    
     writeline(stream, c("SA", NA,codelist$YesNoFields$no,"U",catchsamples$aphia[i],NA,presentation,catchfraction,NA,NA,NA,"U",codelist$RS_UnitType$kg, format(round(catchsamples$catchweight[i]*1000), scientific = F), format(round(conv_factor*catchsamples$lengthsampleweight*1000), scientific = F), NA, NA, NA,codelist$RS_SelectionMethod$systematic, lower_hierarchy, codelist$RS_Sampler$self,NA,NA,NA,NA,format(conv_factor),NA))
     
     individuals <- merge(nmdbiotic$ReadBioticXML_BioticData_individual.txt, catchsamples[i,])
@@ -127,7 +143,7 @@ exportSA <- function(stream, catchsamples, nmdbiotic, lower_hierarchy, catchfrac
 #' @param nmdbiotic IMR biotic data format as formated by RStox parsing functions (for the entire exported data set).
 #' @param fishobservations list of parameters to export, code as RS_BiologicalMeasurementType
 #' @param agingstructure agingstructure for sample, can be NULL if age is not amonv fishobservations
-exportBVunstratified <- function(stream, individuals, nmdbiotic, fishobservations=c(codelist$RS_BiologicalMeasurementType$age, codelist$RS_BiologicalMeasurementType$length, codelist$RS_BiologicalMeasurementType$weight), agingstructure=NULL){
+exportBVunstratified <- function(stream, individuals, nmdbiotic, fishobservations=c(codelist$RS_BiologicalMeasurementType$age, codelist$RS_BiologicalMeasurementType$length, codelist$RS_BiologicalMeasurementType$weight, codelist$RS_BiologicalMeasurementType$sex), agingstructure=NULL){
   
   individuals <- individuals[order(individuals$specimenid),]
   
@@ -156,14 +172,19 @@ exportBVunstratified <- function(stream, individuals, nmdbiotic, fishobservation
         if (!is.na(individuals[i,"individualweight"])){
           writeline(stream, c("BV", fishnumber, stratification, stratum, codelist$RS_BiologicalMeasurementType$weight, individuals[i,"individualweight"]*1000, codelist$RS_UnitOfValue$g, NA, NA, NA, nrow(individuals), sum(!is.na(individuals$weight)), NA, codelist$RS_SelectionMethod$SRSWR, sampler))          
         }
+      } else if (p==codelist$RS_BiologicalMeasurementType$sex){
+        if (!is.na(individuals[i,"sex"])){
+          writeline(stream, c("BV", fishnumber, stratification, stratum, codelist$RS_BiologicalMeasurementType$sex, getSex(individuals[i,"sex"]), NA, NA, NA, NA, nrow(individuals), sum(!is.na(individuals$sex)), NA, codelist$RS_SelectionMethod$SRSWR, sampler))
+        }
       }
       else{
         stop(paste("Parameter", p, "not supported"))
       }
     }
   }
-  
 }
+
+
 
 
 #
@@ -199,7 +220,7 @@ exportLotteryFO <- function(stream, nmdbiotic, lower_hierarchy, selectionProb, s
     fdirarea <- NA
     #Get area and location code defined by Norwegian Directorate of fisheries
     if (!is.na(stations$system[i]) & stations$system[i]=="2"){
-        fdirarea <- formatFdirArea(stations$area[i], stations$location[i])      
+      fdirarea <- formatFdirArea(stations$area[i], stations$location[i])      
     }
     if (is.na(fdirarea)){
       area <- getFDIRarea(stations$latitudestart[i], stations$longitudestart[i])
@@ -208,48 +229,48 @@ exportLotteryFO <- function(stream, nmdbiotic, lower_hierarchy, selectionProb, s
     }
     
     writeline(stream, c("FO",
-                codelist$YesNoFields$no, 
-                stations$station[i], 
-                "U", 
-                codelist$YesNoFields$no, 
-                "U",
-                codelist$RS_Sampler$self,
-                codelist$RS_AggregationLevel$haul,
-                codelist$RS_FishingValidity$valid,
-                codelist$RS_CatchRegistration$landed,
-                stations$stationstartdate[i],
-                stations$stationstarttime[i],
-                stations$stationstopdate[i],
-                stations$stationstoptime[i],
-                NA,
-                sprintf("%2.5f", stations$latitudestart[i]),
-                sprintf("%2.5f", stations$longitudestart[i]),
-                sprintf("%2.5f", stations$latitudeend[i]),
-                sprintf("%2.5f", stations$longitudeend[i]),
-                getEcoZone(stations$latitudestart[i], stations$longitudestart[i]),
-                getDCRareaLvl3(stations$latitudestart[i], stations$longitudestart[i]),
-                getDCRareaLvl5(stations$latitudestart[i], stations$longitudestart[i]),
-                fdirarea,
-                getFishingDepth(stations$fishingdepthmean[i],stations$fishingdepthmin[i], stations$fishingdepthmax[i], stations$fishingdepthstart[i], stations$fishingdepthstop[i]),
-                getBottomDepth(stations$bottomdepthmean[i], stations$bottomdepthstart[i], stations$bottomdepthstop[i]),
-                NA,
-                getMetierLvl5(),
-                getMetierLvl6(),
-                getGear(),
-                getMeshSize(),
-                getSelDev(),
-                getSelDevMeshSize(),
-                targetAssemblageFunction(nmdbiotic),
-                codelist$RS_ObservationCode$hauling,
-                NA,
-                NA,
-                format(stations$selectionprobability[i]),
-                codelist$RS_SelectionMethod$SRSWR,
-                NA,
-                NA,
-                NA,
-                NA,
-                NA
+                        codelist$YesNoFields$no, 
+                        stations$station[i], 
+                        "U", 
+                        codelist$YesNoFields$no, 
+                        "U",
+                        codelist$RS_Sampler$self,
+                        codelist$RS_AggregationLevel$haul,
+                        codelist$RS_FishingValidity$valid,
+                        codelist$RS_CatchRegistration$landed,
+                        stations$stationstartdate[i],
+                        stations$stationstarttime[i],
+                        stations$stationstopdate[i],
+                        stations$stationstoptime[i],
+                        NA,
+                        sprintf("%2.5f", stations$latitudestart[i]),
+                        sprintf("%2.5f", stations$longitudestart[i]),
+                        sprintf("%2.5f", stations$latitudeend[i]),
+                        sprintf("%2.5f", stations$longitudeend[i]),
+                        getEcoZone(stations$latitudestart[i], stations$longitudestart[i]),
+                        getDCRareaLvl3(stations$latitudestart[i], stations$longitudestart[i]),
+                        getDCRareaLvl5(stations$latitudestart[i], stations$longitudestart[i]),
+                        fdirarea,
+                        getFishingDepth(stations$fishingdepthmean[i],stations$fishingdepthmin[i], stations$fishingdepthmax[i], stations$fishingdepthstart[i], stations$fishingdepthstop[i]),
+                        getBottomDepth(stations$bottomdepthmean[i], stations$bottomdepthstart[i], stations$bottomdepthstop[i]),
+                        NA,
+                        getMetierLvl5(),
+                        getMetierLvl6(),
+                        getGear(),
+                        getMeshSize(),
+                        getSelDev(),
+                        getSelDevMeshSize(),
+                        targetAssemblageFunction(nmdbiotic),
+                        codelist$RS_ObservationCode$hauling,
+                        NA,
+                        NA,
+                        format(stations$selectionprobability[i]),
+                        codelist$RS_SelectionMethod$SRSWR,
+                        NA,
+                        NA,
+                        NA,
+                        NA,
+                        NA
     ))
     specieslistfunction(stream)
     
