@@ -127,12 +127,15 @@ exportSA <- function(stream, catchsamples, nmdbiotic, lower_hierarchy, catchfrac
 #' @param nmdbiotic IMR biotic data format as formated by RStox parsing functions (for the entire exported data set).
 #' @param fishobservations list of parameters to export, code as RS_BiologicalMeasurementType
 #' @param agingstructure agingstructure for sample, can be NULL if age is not amonv fishobservations
-exportBVunstratified <- function(stream, individuals, nmdbiotic, fishobservations=c(codelist$RS_BiologicalMeasurementType$age), agingstructure=NULL){
+exportBVunstratified <- function(stream, individuals, nmdbiotic, fishobservations=c(codelist$RS_BiologicalMeasurementType$age, codelist$RS_BiologicalMeasurementType$length, codelist$RS_BiologicalMeasurementType$weight), agingstructure=NULL){
+  
+  individuals <- individuals[order(individuals$specimenid),]
   
   for (i in 1:nrow(individuals)){
     
-    warning("Put in check for multiple age readings")
-    warning("Put in check for agingstructure ind vs agingstructure catch")
+    # for generalization consider
+    # check on multiple age readings
+    # check on aginstructure at individual level vs agingstructure at sample level
     
     fishnumber <- individuals$specimenid[i]
     sampler <- codelist$RS_Sampler$observer
@@ -143,14 +146,20 @@ exportBVunstratified <- function(stream, individuals, nmdbiotic, fishobservation
       if (p==codelist$RS_BiologicalMeasurementType$age){
         if (!is.na(individuals[i,"age"])){
           #what should unit for age be ?
-          writeline(stream, c("BV", fishnumber, stratification, stratum, codelist$RS_BiologicalMeasurementType$age, individuals[i,"age"], NA, NA,getRDBESagingMethod(agingstructure), nrow(individuals), sum(!is.na(individuals$age)), NA, codelist$RS_SelectionMethod$SRSWR, sampler))
+          writeline(stream, c("BV", fishnumber, stratification, stratum, codelist$RS_BiologicalMeasurementType$age, individuals[i,"age"], NA, NA,getRDBESagingMethod(agingstructure), NA, nrow(individuals), sum(!is.na(individuals$age)), NA, codelist$RS_SelectionMethod$SRSWR, sampler))
+        }
+      } else if (p==codelist$RS_BiologicalMeasurementType$length){
+        if (!is.na(individuals[i,"length"])){
+          writeline(stream, c("BV", fishnumber, stratification, stratum, codelist$RS_BiologicalMeasurementType$length, individuals[i,"length"]*1000, codelist$RS_UnitOfValue$mm, NA, NA, NA, nrow(individuals), sum(!is.na(individuals$length)), NA, codelist$RS_SelectionMethod$SRSWR, sampler))  
+        }
+      } else if (p==codelist$RS_BiologicalMeasurementType$weight){
+        if (!is.na(individuals[i,"individualweight"])){
+          writeline(stream, c("BV", fishnumber, stratification, stratum, codelist$RS_BiologicalMeasurementType$weight, individuals[i,"individualweight"]*1000, codelist$RS_UnitOfValue$g, NA, NA, NA, nrow(individuals), sum(!is.na(individuals$weight)), NA, codelist$RS_SelectionMethod$SRSWR, sampler))          
         }
       }
       else{
         stop(paste("Parameter", p, "not supported"))
       }
-      
-      
     }
   }
   

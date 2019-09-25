@@ -71,4 +71,4 @@ if (nrow(herringSelectionProb2018)!=nrow(her2018$ReadBioticXML_BioticData_fishst
 # construct: 
 source("metierannotation.R")
 source("data_conversion.R")
-exportLotteryRDBES("herringlottery.csv", her2018, herringSelectionProb2018, exportHerringSS, 2018, "Pilot of Lottery-sampling herring", "Norwegian fleet > 15 m", generateTargetAssemblageSpecified("SPF"))
+exportLotteryRDBES("herringlottery_H13.csv", her2018, herringSelectionProb2018, exportHerringSS, 2018, "Pilot of Lottery-sampling herring", "Norwegian fleet > 15 m", generateTargetAssemblageSpecified("SPF"))
