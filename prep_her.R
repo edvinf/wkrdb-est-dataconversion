@@ -55,7 +55,7 @@ agesprlg <- aggregate(list(agesampes=indwcatch$age), by=list(serialnumber=indwca
 agesprlg <- agesprlg[order(as.integer(agesprlg$sampletype)),]
 
 
-
+#
 # export data
 # 
 
