@@ -25,6 +25,11 @@ her2018$ReadBioticXML_BioticData_catchsample.txt[her2018$ReadBioticXML_BioticDat
 #one isntance of several catch parts sampled. Given without totalweight, assume replicate samples of catchpartnumber 1, excluding these
 her2018$ReadBioticXML_BioticData_catchsample.txt<-her2018$ReadBioticXML_BioticData_catchsample.txt[her2018$ReadBioticXML_BioticData_catchsample.txt$catchpartnumber==1,]
 
+table(her2018$ReadBioticXML_BioticData_fishstation.txt$gear)
+# three instances of bottom trawl (3100). Landings report pelagic trawl for these.
+her2018$ReadBioticXML_BioticData_fishstation.txt[her2018$ReadBioticXML_BioticData_fishstation.txt$serialnumber %in% c(39001, 39002, 39035), "gear"] <- 3500
+table(her2018$ReadBioticXML_BioticData_fishstation.txt$gear)
+
 #checks on sample data
 all(!is.na(her2018$ReadBioticXML_BioticData_catchsample.txt$catchweight))
 all(!is.na(her2018$ReadBioticXML_BioticData_catchsample.txt$lengthsampleweight))
@@ -45,15 +50,21 @@ st23ind <- merge(st23, her2018$ReadBioticXML_BioticData_individual.txt)
 merge(aggregate(list(ages.na=st23ind$age), by=list(serialn=st23ind$serialnumber, cid=st23ind$catchsampleid), FUN=function(x){sum(is.na(x))}),
       aggregate(list(ages=st23ind$age), by=list(serialn=st23ind$serialnumber, cid=st23ind$catchsampleid), FUN=function(x){sum(!is.na(x))}))
 
-# sampletype 21 is for length-stratified samples, which is what is suggested by the design based estimator proposed by Vølstad and Christman. Need to consult Håkon to find out what the sampling manual is. For purposes of testing estimation prosedures I may treat them as length stratified
 # 0 in some length groups for both sample type 20 and 23 indicate that they are not length stratified
 # number of aged samples frequently larger than 6 for both sampletypes
 # assuming unstratified SRS of fish in haul for both sample types.
+
+#
+# Turns out that sampletype 20 is correct. Missing values are due to readability issues. Encode in SA ?
+#
 
 indwcatch <- merge(her2018$ReadBioticXML_BioticData_catchsample.txt, her2018$ReadBioticXML_BioticData_individual.txt)
 agesprlg <- aggregate(list(agesampes=indwcatch$age), by=list(serialnumber=indwcatch$serialnumber, catchsampleid=indwcatch$catchsampleid, sampletype=indwcatch$length, sampletype=indwcatch$sampletype), FUN=function(x){sum(!is.na(x))})
 agesprlg <- agesprlg[order(as.integer(agesprlg$sampletype)),]
 
+#
+# check gear composition and consider post-stratifying on gear for pilot
+#
 
 #
 # export data

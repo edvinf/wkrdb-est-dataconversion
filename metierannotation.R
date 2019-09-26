@@ -1,10 +1,144 @@
+#'
+#' Keep the functions for individual components of metiers honest (return NA when you don't know)
+#' Any assumptions that needs to be made to fill mandatory fields should go in getMetierLvl5 and getMetierLvl6
+#'
+#'
 
-getMetierLvl5 <- function(){warning("metierannotation not implemented");return(NA)}
-getMetierLvl6 <- function(){warning("metierannotation not implemented");return(NA)}
-getGear <- function(){warning("metierannotation not implemented");return(NA)}
-getMeshSize <- function(){warning("metierannotation not implemented");return(NA)}
-getSelDev <- function(){warning("metierannotation not implemented");return(NA)}
-getSelDevMeshSize <- function(){warning("metierannotation not implemented");return(NA)}
+
+#' Get metier level 5 for gear code and target assemblage
+#' @param NMDreferenceGearCode gear codes defined in NMD reference (NMD biotic)
+#' @param targetAssemblage target assemblage to use
+#' @return may return NA, if metier could not be defined
+getMetierLvl5 <- function(NMDreferenceGearCode, targetAssemblage){
+  gear <- getGear(NMDreferenceGearCode)
+  
+  if (is.na(targetAssemblage)){
+    stop("Need target assembalge to get metier lvl 5")
+  }
+
+  return(paste(gear, targetAssemblage, sep="_"))  
+}
+
+#' Get metier level 6 for gear code and target assemblage
+#' @param NMDreferenceGearCode gear codes defined in NMD reference (NMD biotic)
+#' @param targetAssemblage target assemblage to use
+#' @return may return NA, if metier could not be defined
+getMetierLvl6 <- function(NMDreferenceGearCode, targetAssemblage){
+  gear <- getGear(NMDreferenceGearCode)
+  
+  if (is.na(targetAssemblage)){
+    stop("Need target assembalge to get metier lvl 5")
+  }
+  
+  meshrange <- NA
+  meshsize <- getMeshSize(NMDreferenceGearCode)
+  if (!is.na(meshsize)){
+    if (gear==codelist$GearType$purseseine){
+       if (targetAssemblage=="SPF"){
+         stop(paste("Mesh size range not supported for gear and assemblage:", gear, targetAssemblage))
+       }
+      else{
+        stop(paste("Mesh size range not supported for gear and assemblage:", gear, targetAssemblage))
+      }
+    }
+    if (gear==codelist$GearType$pelagictrawl){
+      if (targetAssemblage=="SPF"){
+        stop(paste("Mesh size range not supported for gear and assemblage:", gear, targetAssemblage))
+      }
+      else{
+        stop(paste("Mesh size range not supported for gear and assemblage:", gear, targetAssemblage))
+      }
+    }
+  }
+  
+  seldev <- getSelDev(NMDreferenceGearCode)
+  
+  seldevmesh <- NA
+  if (!is.na(seldevmesh)){
+    if (gear==codelist$GearType$purseseine){
+      if (targetAssemblage=="SPF"){
+        stop(paste("Selectivity device mesh size range not supported for gear and assemblage:", gear, targetAssemblage))
+      }
+      else{
+        stop(paste("Selectivity device mesh size range not supported for gear and assemblage:", gear, targetAssemblage))
+      }
+    }
+    if (gear==codelist$GearType$pelagictrawl){
+      if (targetAssemblage=="SPF"){
+        stop(paste("Selectivity device mesh size range not supported for gear and assemblage:", gear, targetAssemblage))
+      }
+      else{
+        stop(paste("Selectivity device mesh size range not supported for gear and assemblage:", gear, targetAssemblage))
+      }
+    }
+  }
+  
+  if (!is.na(gear) & !is.na(targetAssemblage) & !is.na(meshrange) & !is.na(seldev) & !is.na(seldevmesh)){
+    return(paste(gear, targetAssemblage, meshrange, seldev, seldevmesh, sep="_"))  
+  }
+  else{
+    return(NA)
+  }
+}
+
+#' Convert gear to FAO codes (RDBES metier codes)
+#' @param NMDreferenceGearCode gear codes defined in NMD reference (NMD biotic)
+getGear <- function(NMDreferenceGearCode){
+  if (NMDreferenceGearCode %in% c(3712,3710)){
+    return(codelist$GearType$purseseine)
+  }
+  if (NMDreferenceGearCode %in% c(3500)){
+    return(codelist$GearType$pelagictrawl)
+  }
+  else{
+    stop(paste("NMD reference gear code ", NMDreferenceGearCode, "not supported."))
+  }
+}
+
+#' Look up mesh size for gear code
+#' @param NMDreferenceGearCode gear codes defined in NMD reference (NMD biotic)
+#' @return may return NA, if mesh size not defined for gear code
+getMeshSize <- function(NMDreferenceGearCode){
+  if (NMDreferenceGearCode %in% c(3712,3710)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(3500)){
+    return(NA)
+  }
+  else{
+    stop(paste("NMD reference gear code ", NMDreferenceGearCode, "not supported."))
+  }
+}
+
+#' Looknup selectivity device for gear code
+#' @param NMDreferenceGearCode gear codes defined in NMD reference (NMD biotic)
+#' @return may return NA, if selectivity device is not defined for gear code
+getSelDev <- function(NMDreferenceGearCode){
+  if (NMDreferenceGearCode %in% c(3712,3710)){
+  return(0) 
+}
+  if (NMDreferenceGearCode %in% c(3500)){
+    return(NA) 
+  }
+  else{
+    stop(paste("NMD reference gear code ", NMDreferenceGearCode, "not supported."))
+  }
+}
+
+#' Lookup selectivity device mesh size for gear code
+#' @param NMDreferenceGearCode gear codes defined in NMD reference (NMD biotic)
+#' @return may return NA, if selectivity device is not defined for gear code
+getSelDevMeshSize <- function(NMDreferenceGearCode){
+  if (NMDreferenceGearCode %in% c(3712,3710)){
+    return(0) 
+  }
+  if (NMDreferenceGearCode %in% c(3500)){
+    return(NA)
+  }
+  else{
+    stop(paste("NMD reference gear code ", NMDreferenceGearCode, "not supported."))
+  }
+}
 
 #
 # Target assemblage contract

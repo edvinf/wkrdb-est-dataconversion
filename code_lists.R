@@ -49,3 +49,7 @@ codelist$RS_MethodForMeasurement$scale <- "Scale"
 codelist$RS_Sex <- list()
 codelist$RS_Sex$male <- "M"
 codelist$RS_Sex$female <- "F"
+codelist$GearType <- list()
+codelist$GearType$purseseine <- "PS"
+codelist$GearType$purseseinelampara <- "LA"
+codelist$GearType$pelagictrawl <- "OTM"

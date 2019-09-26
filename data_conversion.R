@@ -227,7 +227,7 @@ exportLotteryFO <- function(stream, nmdbiotic, lower_hierarchy, selectionProb, s
       location <- getFDIRlocation(stations$latitudestart[i], stations$longitudestart[i])
       fdirarea <- formatFdirArea(area, location)      
     }
-    
+    assemblage <- targetAssemblageFunction(nmdbiotic)
     writeline(stream, c("FO",
                         codelist$YesNoFields$no, 
                         stations$station[i], 
@@ -247,20 +247,21 @@ exportLotteryFO <- function(stream, nmdbiotic, lower_hierarchy, selectionProb, s
                         sprintf("%2.5f", stations$longitudestart[i]),
                         sprintf("%2.5f", stations$latitudeend[i]),
                         sprintf("%2.5f", stations$longitudeend[i]),
-                        getEcoZone(stations$latitudestart[i], stations$longitudestart[i]),
+                        #getEcoZone(stations$latitudestart[i], stations$longitudestart[i]),
+                        NA,
                         getDCRareaLvl3(stations$latitudestart[i], stations$longitudestart[i]),
                         getDCRareaLvl5(stations$latitudestart[i], stations$longitudestart[i]),
                         fdirarea,
                         getFishingDepth(stations$fishingdepthmean[i],stations$fishingdepthmin[i], stations$fishingdepthmax[i], stations$fishingdepthstart[i], stations$fishingdepthstop[i]),
                         getBottomDepth(stations$bottomdepthmean[i], stations$bottomdepthstart[i], stations$bottomdepthstop[i]),
                         NA,
-                        getMetierLvl5(),
-                        getMetierLvl6(),
-                        getGear(),
-                        getMeshSize(),
-                        getSelDev(),
-                        getSelDevMeshSize(),
-                        targetAssemblageFunction(nmdbiotic),
+                        getMetierLvl5(stations$gear[i], assemblage),
+                        getMetierLvl6(stations$gear[i], assemblage),
+                        getGear(stations$gear[i]),
+                        getMeshSize(stations$gear[i]),
+                        getSelDev(stations$gear[i]),
+                        getSelDevMeshSize(stations$gear[i]),
+                        assemblage,
                         codelist$RS_ObservationCode$hauling,
                         NA,
                         NA,
