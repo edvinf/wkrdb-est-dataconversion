@@ -119,8 +119,9 @@ exportSA <- function(stream, catchsamples, nmdbiotic, lower_hierarchy, catchfrac
       #when implementing conversion, check if it should also be applied to total weights
     }
     
-    writeline(stream, c("SA", NA,codelist$YesNoFields$no,"U",catchsamples$aphia[i],NA,presentation,catchfraction,NA,NA,NA,"U",codelist$RS_UnitType$kg, format(round(catchsamples$catchweight[i]*1000), scientific = F), format(round(conv_factor*catchsamples$lengthsampleweight*1000), scientific = F), NA, NA, NA,codelist$RS_SelectionMethod$systematic, lower_hierarchy, codelist$RS_Sampler$self,NA,NA,NA,NA,format(conv_factor),NA))
-    
+    #writeline(stream, c("SA", NA,codelist$RS_Stratfification$unstratified,"U",catchsamples$aphia[i],NA,presentation,catchfraction,NA,NA,NA,"U",codelist$RS_UnitType$kg, format(round(catchsamples$catchweight[i]*1000), scientific = F), format(round(conv_factor*catchsamples$lengthsampleweight*1000), scientific = F), NA, NA, NA,codelist$RS_SelectionMethod$systematic, lower_hierarchy, codelist$RS_Sampler$self,NA,NA,NA,NA,format(conv_factor),NA))
+    # got error message on number of SA fields. Removing the last a bit arbitrarily
+    writeline(stream, c("SA", NA,codelist$RS_Stratfification$unstratified,"U",catchsamples$aphia[i],NA,presentation,catchfraction,NA,NA,NA,"U",codelist$RS_UnitType$kg, format(round(catchsamples$catchweight[i]*1000), scientific = F), format(round(conv_factor*catchsamples$lengthsampleweight*1000), scientific = F), NA, NA, NA,codelist$RS_SelectionMethod$systematic, lower_hierarchy, codelist$RS_Sampler$self,NA,NA,NA,NA,format(conv_factor)))
     individuals <- merge(nmdbiotic$ReadBioticXML_BioticData_individual.txt, catchsamples[i,])
     
     if (lower_hierarchy=="A"){
@@ -138,12 +139,13 @@ exportSA <- function(stream, catchsamples, nmdbiotic, lower_hierarchy, catchfrac
   }
 }
 
+obs <- c(codelist$RS_BiologicalMeasurementType$length, codelist$RS_BiologicalMeasurementType$age, codelist$RS_BiologicalMeasurementType$weight, codelist$RS_BiologicalMeasurementType$sex)
 #' Export BV lines for RDBES
 #' @param individuals data frame of individuals to process (subset of those found in nmdbiotic)
 #' @param nmdbiotic IMR biotic data format as formated by RStox parsing functions (for the entire exported data set).
 #' @param fishobservations list of parameters to export, code as RS_BiologicalMeasurementType
 #' @param agingstructure agingstructure for sample, can be NULL if age is not amonv fishobservations
-exportBVunstratified <- function(stream, individuals, nmdbiotic, fishobservations=c(codelist$RS_BiologicalMeasurementType$age, codelist$RS_BiologicalMeasurementType$length, codelist$RS_BiologicalMeasurementType$weight, codelist$RS_BiologicalMeasurementType$sex), agingstructure=NULL){
+exportBVunstratified <- function(stream, individuals, nmdbiotic, fishobservations=obs, agingstructure=NULL){
   
   individuals <- individuals[order(individuals$specimenid),]
   
@@ -155,7 +157,7 @@ exportBVunstratified <- function(stream, individuals, nmdbiotic, fishobservation
     
     fishnumber <- individuals$specimenid[i]
     sampler <- codelist$RS_Sampler$observer
-    stratification <- codelist$YesNoFields$no
+    stratification <- codelist$RS_Stratfification$unstratified
     stratum <- "U"
     
     for (p in fishobservations){
@@ -197,7 +199,7 @@ exportLotteryDE <- function(stream, samplingschemename, samplingframedesc, year)
 #' Exports SD table for lottery sampling
 #' @param samplingcounty consult RDBES documentatino
 #' @param samplinginstitution consult RDBES documentatino
-exportLotterySD <- function(stream, samplingcountry=codelist$ISO_3166$norway, samplinginstitution="IMR"){
+exportLotterySD <- function(stream, samplingcountry=codelist$ISO_3166$norway, samplinginstitution=codelist$EDMO$IMR){
   writeline(stream, c("SD", samplingcountry, samplinginstitution))
 }
 
@@ -218,21 +220,32 @@ exportLotteryFO <- function(stream, nmdbiotic, lower_hierarchy, selectionProb, s
   for (i in 1:nrow(stations)){
     
     fdirarea <- NA
+    #Didn1t validate leave out for now
     #Get area and location code defined by Norwegian Directorate of fisheries
-    if (!is.na(stations$system[i]) & stations$system[i]=="2"){
-      fdirarea <- formatFdirArea(stations$area[i], stations$location[i])      
+    #if (!is.na(stations$system[i]) & stations$system[i]=="2"){
+    #  fdirarea <- formatFdirArea(stations$area[i], stations$location[i])      
+    #}
+    #if (is.na(fdirarea)){
+    #  area <- getFDIRarea(stations$latitudestart[i], stations$longitudestart[i])
+    #  location <- getFDIRlocation(stations$latitudestart[i], stations$longitudestart[i])
+    #  fdirarea <- formatFdirArea(area, location)      
+    #}
+    
+    stoplon <- stations$longitudeend[i]
+    if (!is.na(stoplon)){
+      stoplon <- sprintf("%2.5f", stoplon)  
     }
-    if (is.na(fdirarea)){
-      area <- getFDIRarea(stations$latitudestart[i], stations$longitudestart[i])
-      location <- getFDIRlocation(stations$latitudestart[i], stations$longitudestart[i])
-      fdirarea <- formatFdirArea(area, location)      
+    stoplat <-stations$latitudeend[i]
+    if (!is.na(stoplat)){
+      stoplat <- sprintf("%2.5f", stoplat)
     }
+    
     assemblage <- targetAssemblageFunction(nmdbiotic)
     writeline(stream, c("FO",
-                        codelist$YesNoFields$no, 
+                        codelist$RS_Stratfification$unstratified, 
                         stations$station[i], 
                         "U", 
-                        codelist$YesNoFields$no, 
+                        codelist$RS_Clustering$unclustered, 
                         "U",
                         codelist$RS_Sampler$self,
                         codelist$RS_AggregationLevel$haul,
@@ -240,21 +253,22 @@ exportLotteryFO <- function(stream, nmdbiotic, lower_hierarchy, selectionProb, s
                         codelist$RS_CatchRegistration$landed,
                         stations$stationstartdate[i],
                         stations$stationstarttime[i],
-                        stations$stationstopdate[i],
+                        stations$stationstartdate[i], #mandatory, putting in startdate for now. stations$stationstopdate[i],
                         stations$stationstoptime[i],
                         NA,
                         sprintf("%2.5f", stations$latitudestart[i]),
                         sprintf("%2.5f", stations$longitudestart[i]),
-                        sprintf("%2.5f", stations$latitudeend[i]),
-                        sprintf("%2.5f", stations$longitudeend[i]),
+                        stoplat,
+                        stoplon,
                         #getEcoZone(stations$latitudestart[i], stations$longitudestart[i]),
                         NA,
                         getDCRareaLvl3(stations$latitudestart[i], stations$longitudestart[i]),
-                        getDCRareaLvl5(stations$latitudestart[i], stations$longitudestart[i]),
+                        NA, # didnt valudate, take out for now: getDCRareaLvl5(stations$latitudestart[i], stations$longitudestart[i]),
                         fdirarea,
                         getFishingDepth(stations$fishingdepthmean[i],stations$fishingdepthmin[i], stations$fishingdepthmax[i], stations$fishingdepthstart[i], stations$fishingdepthstop[i]),
                         getBottomDepth(stations$bottomdepthmean[i], stations$bottomdepthstart[i], stations$bottomdepthstop[i]),
                         NA,
+                        NA, #functional unit removed or not ?
                         getMetierLvl5(stations$gear[i], assemblage),
                         getMetierLvl6(stations$gear[i], assemblage),
                         getGear(stations$gear[i]),
@@ -310,6 +324,6 @@ exportHerringSL2018 <- function(stream){
   writeline(stream, c("SL","Herring",2018,126417,codelist$SpecASFIS$herring,codelist$RS_CatchRegistration$landed))
 }
 exportHerringSS <- function(stream){
-  exportHerringSL(stream)  
-  writeline(stream, c("SS", codelist$YesNoFields$no, codelist$RS_ObservationCode$hauling,codelist$RS_CatchRegistration$landed,codelist$RS_ObservationType$volume,"U",codelist$YesNoFields$no,"U",codelist$RS_Sampler$self,"Herring",1,1,codelist$RS_SelectionMethod$CENSUS,NA,NA,NA,NA,NA))
+  writeline(stream, c("SS", codelist$RS_Stratfification$unstratified, codelist$RS_ObservationActivityCode$haul,codelist$RS_CatchRegistration$landed,codelist$RS_ObservationType$volume,"U",codelist$RS_Clustering$unclustered,"U",codelist$RS_Sampler$self,"Herring",1,1,codelist$RS_SelectionMethod$CENSUS,NA,NA,NA,NA,NA))
+  exportHerringSL2018(stream)
 }

@@ -83,3 +83,8 @@ if (nrow(herringSelectionProb2018)!=nrow(her2018$ReadBioticXML_BioticData_fishst
 source("metierannotation.R")
 source("data_conversion.R")
 exportLotteryRDBES("herringlottery_H13.csv", her2018, herringSelectionProb2018, exportHerringSS, 2018, "Pilot of Lottery-sampling herring", "Norwegian fleet > 15 m", generateTargetAssemblageSpecified("SPF"))
+warning("FO Functional unit?")
+warning("SA last element")
+warning("FOsubpolygon")
+warning("FOrectangle")
+warning("FOstopdate")

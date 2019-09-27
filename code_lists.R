@@ -15,11 +15,13 @@ codelist$RS_CatchFraction<-list()
 codelist$RS_CatchFraction$landed<-"Lan"
 codelist$RS_ObservationCode <- list()
 codelist$RS_ObservationCode$None <- "None"
-codelist$RS_ObservationCode$hauling <- "Haul"
+codelist$RS_ObservationCode$hauling <- "Ha"
+codelist$RS_ObservationActivityCode <- list()
+codelist$RS_ObservationActivityCode$haul<-"haul"
 codelist$RS_SelectionMethod<-list()
 codelist$RS_SelectionMethod$SRSWR<- "SRSWR"
 codelist$RS_SelectionMethod$CENSUS<- "CENSUS"
-codelist$RS_SelectionMethod$systematic<- "SSYS"
+codelist$RS_SelectionMethod$systematic<- "SYSS"
 codelist$RS_LowerHierarchy<-list()
 codelist$RS_LowerHierarchy$BVonly<-"C"
 codelist$RS_UpperHierarchy<-list()
@@ -53,3 +55,10 @@ codelist$GearType <- list()
 codelist$GearType$purseseine <- "PS"
 codelist$GearType$purseseinelampara <- "LA"
 codelist$GearType$pelagictrawl <- "OTM"
+codelist$RS_Stratfification <- list()
+codelist$RS_Stratfification$stratified <- "Yes"
+codelist$RS_Stratfification$unstratified <- "No"
+codelist$RS_Clustering <- list()
+codelist$RS_Clustering$unclustered <- "No"
+codelist$EDMO <- list()
+codelist$EDMO$IMR <- "1351"
