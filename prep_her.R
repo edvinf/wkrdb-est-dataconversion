@@ -10,9 +10,9 @@ library(ggplot2)
 #sample data
 her2018 <- Rstox::readXMLfiles(files = list(biotic=c("data/herringlot_2018.xml")))
 
-v<-getNMDinfo("v")
-v <- v[v$platformNumber %in% arg2018$ReadBioticXML_BioticData_fishstation.txt$catchplatform,]
-v$REGM <- gsub(pattern = "-", "", v$Norwegian_Fisheries_Register)
+#v<-getNMDinfo("v")
+#v <- v[v$platformNumber %in% her2018$ReadBioticXML_BioticData_fishstation.txt$catchplatform,]
+#v$REGM <- gsub(pattern = "-", "", v$Norwegian_Fisheries_Register)
 
 #landings
 l<-locale()
@@ -78,13 +78,24 @@ if (nrow(herringSelectionProb2018)!=nrow(her2018$ReadBioticXML_BioticData_fishst
   stop("Error in merging selection probabilities")
 }
 
+#
+# hack stationnumbers to make them unique
+#
+
+her2018$ReadBioticXML_BioticData_fishstation.txt$station <- 1:nrow(her2018$ReadBioticXML_BioticData_fishstation.txt)
+
 # Hierarchy 13: haul
 # construct: 
 source("metierannotation.R")
 source("data_conversion.R")
 exportLotteryRDBES("herringlottery_H13.csv", her2018, herringSelectionProb2018, exportHerringSS, 2018, "Pilot of Lottery-sampling herring", "Norwegian fleet > 15 m", generateTargetAssemblageSpecified("SPF"))
 warning("FO Functional unit?")
+warning("FOclarifyHaulN")
 warning("SA last element")
 warning("FOsubpolygon")
 warning("FOrectangle")
 warning("FOstopdate")
+warning("BVStratifictaion909")
+warning("BVUnitScaleListA")
+warning("BVageMM")
+warning("BVsexMM")
