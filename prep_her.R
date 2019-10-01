@@ -89,6 +89,7 @@ her2018$ReadBioticXML_BioticData_fishstation.txt$station <- 1:nrow(her2018$ReadB
 source("metierannotation.R")
 source("data_conversion.R")
 exportLotteryRDBES("herringlottery_H13.csv", her2018, herringSelectionProb2018, exportHerringSS, 2018, "Pilot of Lottery-sampling herring", "Norwegian fleet > 15 m", generateTargetAssemblageSpecified("SPF"))
+warning("ReasonNotSampledBV")
 warning("FO Functional unit?")
 warning("FOclarifyHaulN")
 warning("SA last element")
