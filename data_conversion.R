@@ -163,19 +163,19 @@ exportBVunstratified <- function(stream, individuals, nmdbiotic, fishobservation
       if (p==codelist$RS_BiologicalMeasurementType$age){
         if (!is.na(individuals[i,"age"])){
           #what should unit for age be ?
-          writeline(stream, c("BV", fishnumber, stratification, stratum, codelist$RS_BiologicalMeasurementType$age, individuals[i,"age"], "Year", unitscalelist,getRDBESagingMethod(agingstructure), NA, nrow(individuals), sum(!is.na(individuals$age) | !is.na(individuals$readability)), NA, codelist$RS_SelectionMethod$SRSWR, sampler))
+          writeline(stream, c("BV", fishnumber, stratification, stratum, codelist$RS_BiologicalMeasurementType$age, individuals[i,"age"], "Year", unitscalelist,getRDBESagingMethod(agingstructure), NA, nrow(individuals), sum(!is.na(individuals$age) | !is.na(individuals$readability)), NA, codelist$RS_SelectionMethod$SRSWOR, sampler))
         }
       } else if (p==codelist$RS_BiologicalMeasurementType$length){
         if (!is.na(individuals[i,"length"])){
-          writeline(stream, c("BV", fishnumber, stratification, stratum, codelist$RS_BiologicalMeasurementType$length, individuals[i,"length"]*1000, codelist$RS_UnitOfValue$mm, unitscalelist, NA, NA, nrow(individuals), sum(!is.na(individuals$length)), NA, codelist$RS_SelectionMethod$SRSWR, sampler))  
+          writeline(stream, c("BV", fishnumber, stratification, stratum, codelist$RS_BiologicalMeasurementType$length, individuals[i,"length"]*1000, codelist$RS_UnitOfValue$mm, unitscalelist, NA, NA, nrow(individuals), sum(!is.na(individuals$length)), NA, codelist$RS_SelectionMethod$SRSWOR, sampler))  
         }
       } else if (p==codelist$RS_BiologicalMeasurementType$weight){
         if (!is.na(individuals[i,"individualweight"])){
-          writeline(stream, c("BV", fishnumber, stratification, stratum, codelist$RS_BiologicalMeasurementType$weight, individuals[i,"individualweight"]*1000, codelist$RS_UnitOfValue$g, unitscalelist, NA, NA, nrow(individuals), sum(!is.na(individuals$weight)), NA, codelist$RS_SelectionMethod$SRSWR, sampler))          
+          writeline(stream, c("BV", fishnumber, stratification, stratum, codelist$RS_BiologicalMeasurementType$weight, individuals[i,"individualweight"]*1000, codelist$RS_UnitOfValue$g, unitscalelist, NA, NA, nrow(individuals), sum(!is.na(individuals$weight)), NA, codelist$RS_SelectionMethod$SRSWOR, sampler))          
         }
       } else if (p==codelist$RS_BiologicalMeasurementType$sex){
         if (!is.na(individuals[i,"sex"])){
-          writeline(stream, c("BV", fishnumber, stratification, stratum, codelist$RS_BiologicalMeasurementType$sex, getSex(individuals[i,"sex"]), NA, unitscalelist, NA, NA, nrow(individuals), sum(!is.na(individuals$sex)), NA, codelist$RS_SelectionMethod$SRSWR, sampler))
+          writeline(stream, c("BV", fishnumber, stratification, stratum, codelist$RS_BiologicalMeasurementType$sex, getSex(individuals[i,"sex"]), NA, unitscalelist, NA, NA, nrow(individuals), sum(!is.na(individuals$sex)), NA, codelist$RS_SelectionMethod$SRSWOR, sampler))
         }
       }
       else{
@@ -278,7 +278,7 @@ exportLotteryFO <- function(stream, nmdbiotic, lower_hierarchy, selectionProb, s
                         NA,
                         NA,
                         format(stations$selectionprobability[i]),
-                        codelist$RS_SelectionMethod$SRSWR,
+                        codelist$RS_SelectionMethod$UPSWOR,
                         NA,
                         NA,
                         NA,
