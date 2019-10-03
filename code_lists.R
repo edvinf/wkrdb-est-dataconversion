@@ -20,8 +20,10 @@ codelist$RS_ObservationActivityCode <- list()
 codelist$RS_ObservationActivityCode$haul<-"haul"
 codelist$RS_SelectionMethod<-list()
 codelist$RS_SelectionMethod$SRSWR<- "SRSWR"
+codelist$RS_SelectionMethod$SRSWOR<- "SRSWOR"
 codelist$RS_SelectionMethod$CENSUS<- "CENSUS"
 codelist$RS_SelectionMethod$systematic<- "SYSS"
+codelist$RS_SelectionMethod$UPSWOR <-"UPSWOR"
 codelist$RS_LowerHierarchy<-list()
 codelist$RS_LowerHierarchy$BVonly<-"C"
 codelist$RS_UpperHierarchy<-list()
