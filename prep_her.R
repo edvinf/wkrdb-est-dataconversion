@@ -73,7 +73,9 @@ agesprlg <- agesprlg[order(as.integer(agesprlg$sampletype)),]
 #estimate probabilities from registered weights (actual probabilities was set on reported weight during haul and set quoate for the fishery and a total sampling capacity of 200? catches)
 
 herringSelectionProb2018 <- aggregate(list(catch_kg=her2018$ReadBioticXML_BioticData_catchsample.txt$catchweight), by=list(platform=her2018$ReadBioticXML_BioticData_catchsample.txt$platform, startyear=her2018$ReadBioticXML_BioticData_catchsample.txt$startyear, missiontype=her2018$ReadBioticXML_BioticData_catchsample.txt$missiontype, missionnumber=her2018$ReadBioticXML_BioticData_catchsample.txt$missionnumber, serialnumber=her2018$ReadBioticXML_BioticData_catchsample.txt$serialnumber), FUN=sum)
-herringSelectionProb2018$selectionprobability<-200*herringSelectionProb2018$catch_kg/sum(landings$Rundvekt)
+#herringSelectionProb2018$selectionprobability<-herringSelectionProb2018$catch_kg/sum(landings$Rundvekt)
+# use same totals as used in ECA
+herringSelectionProb2018$selectionprobability<-herringSelectionProb2018$catch_kg/(332026*(1000))
 if (nrow(herringSelectionProb2018)!=nrow(her2018$ReadBioticXML_BioticData_fishstation.txt)){
   stop("Error in merging selection probabilities")
 }
