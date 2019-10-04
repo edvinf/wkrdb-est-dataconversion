@@ -119,7 +119,7 @@ exportSA <- function(stream, catchsamples, nmdbiotic, lower_hierarchy, catchfrac
       #when implementing conversion, check if it should also be applied to total weights
     }
     
-    writeline(stream, c("SA", NA,codelist$RS_Stratfification$unstratified,"U",catchsamples$aphia[i],NA,presentation,catchfraction,NA,NA,NA,"U",codelist$RS_UnitType$kg, format(round(catchsamples$catchweight[i]*1000), scientific = F), format(round(conv_factor*catchsamples$lengthsampleweight*1000), scientific = F), NA, NA, NA,codelist$RS_SelectionMethod$systematic, lower_hierarchy, codelist$RS_Sampler$self,NA,NA,NA,NA,format(conv_factor),NA))
+    writeline(stream, c("SA", NA,codelist$RS_Stratfification$unstratified,"U",catchsamples$aphia[i],NA,presentation,catchfraction,NA,NA,NA,"U",codelist$RS_UnitType$kg, format(round(catchsamples$catchweight[i]*1000), scientific = F), format(round(conv_factor*catchsamples$lengthsampleweight*1000), scientific = F), NA, NA, NA,codelist$RS_SelectionMethod$systematic, lower_hierarchy, codelist$RS_Sampler$self,NA,NA,NA,NA,format(conv_factor)))
     individuals <- merge(nmdbiotic$ReadBioticXML_BioticData_individual.txt, catchsamples[i,])
     
     if (lower_hierarchy=="A"){
@@ -260,10 +260,10 @@ exportLotteryFO <- function(stream, nmdbiotic, lower_hierarchy, selectionProb, s
                         stoplat,
                         stoplon,
                         getEcoZone(stations$latitudestart[i], stations$longitudestart[i]),
-                        NA,
                         getDCRareaLvl3(stations$latitudestart[i], stations$longitudestart[i]),
                         getDCRareaLvl5(stations$latitudestart[i], stations$longitudestart[i]),
                         fdirarea,
+                        NA,
                         getFishingDepth(stations$fishingdepthmean[i],stations$fishingdepthmin[i], stations$fishingdepthmax[i], stations$fishingdepthstart[i], stations$fishingdepthstop[i]),
                         getBottomDepth(stations$bottomdepthmean[i], stations$bottomdepthstart[i], stations$bottomdepthstop[i]),
                         NA,
