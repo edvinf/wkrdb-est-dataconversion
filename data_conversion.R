@@ -155,15 +155,16 @@ exportBVunstratified <- function(stream, individuals, nmdbiotic, fishobservation
     
     fishnumber <- individuals$specimenid[i]
     sampler <- codelist$RS_Sampler$observer
-    stratification <- codelist$RS_Stratfification$unstratified
-    unitscalelist <- NA
+    stratification <- 909 #codelist$RS_Stratfification$unstratified
+    unitscalelist <- "A"
     stratum <- "U"
     
     for (p in fishobservations){
       if (p==codelist$RS_BiologicalMeasurementType$age){
         if (!is.na(individuals[i,"age"])){
           #what should unit for age be ?
-          writeline(stream, c("BV", fishnumber, stratification, stratum, codelist$RS_BiologicalMeasurementType$age, individuals[i,"age"], "Year", unitscalelist,getRDBESagingMethod(agingstructure), NA, nrow(individuals), sum(!is.na(individuals$age)), NA, codelist$RS_SelectionMethod$SRSWOR, sampler))
+          #writeline(stream, c("BV", fishnumber, stratification, stratum, codelist$RS_BiologicalMeasurementType$age, individuals[i,"age"], "Year", unitscalelist,getRDBESagingMethod(agingstructure), NA, nrow(individuals), sum(!is.na(individuals$age)), NA, codelist$RS_SelectionMethod$SRSWOR, sampler))
+          writeline(stream, c("BV", fishnumber, stratification, stratum, codelist$RS_BiologicalMeasurementType$age, individuals[i,"age"], "mm", unitscalelist,getRDBESagingMethod(agingstructure), NA, nrow(individuals), sum(!is.na(individuals$age)), NA, codelist$RS_SelectionMethod$SRSWOR, sampler))
         }
       } else if (p==codelist$RS_BiologicalMeasurementType$length){
         if (!is.na(individuals[i,"length"])){
@@ -175,7 +176,8 @@ exportBVunstratified <- function(stream, individuals, nmdbiotic, fishobservation
         }
       } else if (p==codelist$RS_BiologicalMeasurementType$sex){
         if (!is.na(individuals[i,"sex"])){
-          writeline(stream, c("BV", fishnumber, stratification, stratum, codelist$RS_BiologicalMeasurementType$sex, getSex(individuals[i,"sex"]), NA, unitscalelist, NA, NA, nrow(individuals), sum(!is.na(individuals$sex)), NA, codelist$RS_SelectionMethod$SRSWOR, sampler))
+          #writeline(stream, c("BV", fishnumber, stratification, stratum, codelist$RS_BiologicalMeasurementType$sex, getSex(individuals[i,"sex"]), NA, unitscalelist, NA, NA, nrow(individuals), sum(!is.na(individuals$sex)), NA, codelist$RS_SelectionMethod$SRSWOR, sampler))
+          writeline(stream, c("BV", fishnumber, stratification, stratum, codelist$RS_BiologicalMeasurementType$sex, getSex(individuals[i,"sex"]), "mm", unitscalelist, NA, NA, nrow(individuals), sum(!is.na(individuals$sex)), NA, codelist$RS_SelectionMethod$SRSWOR, sampler))
         }
       }
       else{
@@ -261,7 +263,7 @@ exportLotteryFO <- function(stream, nmdbiotic, lower_hierarchy, selectionProb, s
                         stoplon,
                         getEcoZone(stations$latitudestart[i], stations$longitudestart[i]),
                         getDCRareaLvl3(stations$latitudestart[i], stations$longitudestart[i]),
-                        getDCRareaLvl5(stations$latitudestart[i], stations$longitudestart[i]),
+                        NA,#getDCRareaLvl5(stations$latitudestart[i], stations$longitudestart[i]),
                         fdirarea,
                         NA,
                         getFishingDepth(stations$fishingdepthmean[i],stations$fishingdepthmin[i], stations$fishingdepthmax[i], stations$fishingdepthstart[i], stations$fishingdepthstop[i]),
