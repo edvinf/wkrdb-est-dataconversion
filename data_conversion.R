@@ -103,6 +103,8 @@ getSex <-function(NMDreferenceSex){
 }
 
 #' Export SA lines for RDBES
+#' @details 
+#'  Assumes no replicate sampels were taken from catch.
 #' @param catchsamples data fram of catchsamples to process (subset of those found in nmdbiotic)
 #' @param nmdbiotic IMR biotic data format as formated by RStox parsing functions (for the entire exported data set).
 #' @param lower_hierarchy code for which lower hiearchy to use for export of fish measurements
@@ -119,7 +121,7 @@ exportSA <- function(stream, catchsamples, nmdbiotic, lower_hierarchy, catchfrac
       #when implementing conversion, check if it should also be applied to total weights
     }
     
-    writeline(stream, c("SA", NA,codelist$RS_Stratfification$unstratified,"U",catchsamples$aphia[i],NA,presentation,catchfraction,NA,NA,NA,"U",codelist$RS_UnitType$kg, format(round(catchsamples$catchweight[i]*1000), scientific = F), format(round(conv_factor*catchsamples$lengthsampleweight*1000), scientific = F), NA, NA, NA,codelist$RS_SelectionMethod$systematic, lower_hierarchy, codelist$RS_Sampler$self,NA,NA,NA,NA,format(conv_factor)))
+    writeline(stream, c("SA", NA,codelist$RS_Stratfification$unstratified,"U",catchsamples$aphia[i],NA,presentation,catchfraction,NA,NA,NA,"U",codelist$RS_UnitType$basket, format(round(catchsamples$catchweight[i]*1000), scientific = F), format(round(conv_factor*catchsamples$lengthsampleweight*1000), scientific = F), format(round(conv_factor*catchsamples$lengthsampleweight/catchsamples$catchweight[i]), scientific = F), 1, NA,codelist$RS_SelectionMethod$systematic, lower_hierarchy, codelist$RS_Sampler$self,NA,NA,NA,NA,format(conv_factor)))
     individuals <- merge(nmdbiotic$ReadBioticXML_BioticData_individual.txt, catchsamples[i,])
     
     if (lower_hierarchy=="A"){
