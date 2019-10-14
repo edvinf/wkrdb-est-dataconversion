@@ -121,7 +121,7 @@ exportSA <- function(stream, catchsamples, nmdbiotic, lower_hierarchy, catchfrac
       #when implementing conversion, check if it should also be applied to total weights
     }
     
-    writeline(stream, c("SA", NA,codelist$RS_Stratfification$unstratified,"U",catchsamples$aphia[i],NA,presentation,catchfraction,NA,NA,NA,"U",codelist$RS_UnitType$basket, format(round(catchsamples$catchweight[i]*1000), scientific = F), format(round(conv_factor*catchsamples$lengthsampleweight*1000), scientific = F), format(round(catchsamples$catchweight[i]/(conv_factor*catchsamples$lengthsampleweight)), scientific = F), 1, NA,codelist$RS_SelectionMethod$systematic, lower_hierarchy, codelist$RS_Sampler$self,NA,NA,NA,NA,format(conv_factor),NA))
+    writeline(stream, c("SA", NA,codelist$RS_Stratfification$unstratified,"U",catchsamples$aphia[i],NA,presentation,catchfraction,NA,NA,NA,"U",codelist$RS_UnitType$basket, format(round(catchsamples$catchweight[i]*1000), scientific = F), format(round(conv_factor*catchsamples$lengthsampleweight*1000), scientific = F), format(catchsamples$catchweight[i]/(conv_factor*catchsamples$lengthsampleweight), scientific = F), 1, NA,codelist$RS_SelectionMethod$systematic, lower_hierarchy, codelist$RS_Sampler$self,NA,NA,NA,NA,format(conv_factor),NA))
     individuals <- merge(nmdbiotic$ReadBioticXML_BioticData_individual.txt, catchsamples[i,])
     
     if (lower_hierarchy=="A"){
