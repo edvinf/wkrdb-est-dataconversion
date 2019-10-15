@@ -89,5 +89,5 @@ her2018$ReadBioticXML_BioticData_fishstation.txt$station <- 1:nrow(her2018$ReadB
 # Hierarchy 13: haul
 # construct: 
 source("metierannotation.R")
-source("data_conversion.R")
+source("lottery_conversion.R")
 exportLotteryRDBES("herringlottery_H13.csv", her2018, herringSelectionProb2018, exportHerringSS, 2018, "Pilot of Lottery-sampling herring", "Norwegian fleet > 15 m", generateTargetAssemblageSpecified("SPF"))
