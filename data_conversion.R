@@ -14,6 +14,23 @@ writeline <- function(stream, fields){
   write(fields, sep=",", file=stream, ncolumns = length(fields))
 }
 
+warning("getConversionFactor not implemented")
+#' Returns conversion factor to whole weight
+#' @param presentation code for presentation according to RS_Presentation
+#' @param species aphia code for species
+#' @return conversion factor that can be used to estimate whole weight by multiplying with weight for the given presentation
+getConversionFactor <- function(presentation, species){
+  return(NA)
+}
+
+warning("getLoCode not implemented")
+#' Returns LOCODE for landing site
+#' @param landingssite landing site code defined in NMD reference (used in NMD biotic)
+#' @return LOCODE
+getLoCode <- function(landingsite){
+  return(NA)
+}
+
 #' formats an area code based on area and location parameters defined by the Norwegian Directorat of Fisheries
 #' @description 
 #' formats area as <area code>-<location code>
@@ -67,8 +84,17 @@ getBottomDepth <- function(meandepth, depthstart, depthstop){
 #' Converts presentation codes from NMD reference (NMD biotic) to RDBES
 #' @param NMDReferenceProducttype code for producttype as defined in NMD reference.
 getPresentation <- function(NMDReferenceProducttype){
-  if (NMDReferenceProducttype=="1"){
+  if (is.na(NMDReferenceProducttype)){
+    return(NA)
+  }
+  else if (NMDReferenceProducttype=="1"){
     return(codelist$RS_Presentation$whole)
+  }
+  else if (NMDReferenceProducttype=="4"){
+    return(codelist$RS_Presentation$gutted)
+  }
+  else if (NMDReferenceProducttype=="3"){
+    return(codelist$RS_Presentation$headless)
   }
   else{
     stop(paste("NMD product type not supported", NMDReferenceProducttype))
@@ -109,33 +135,57 @@ getSex <-function(NMDreferenceSex){
 #' @param nmdbiotic IMR biotic data format as formated by RStox parsing functions (for the entire exported data set).
 #' @param lower_hierarchy code for which lower hiearchy to use for export of fish measurements
 #' @param catchfraction the fraction of the catch that was sampled code as RS_CatchFraction
-exportSA <- function(stream, catchsamples, nmdbiotic, lower_hierarchy, catchfraction){
+#' @param selectionmethod the selectionmethod used for selecting sample
+exportSA <- function(stream, catchsamples, nmdbiotic, lower_hierarchy, catchfraction, selectionmethod=codelist$RS_SelectionMethod$systematic){
   
   for (i in 1:nrow(catchsamples)){
     presentation <- getPresentation(catchsamples$sampleproducttype[i]) 
-    if (presentation==codelist$RS_Presentation$whole){
+    if (is.na(presentation)){
+      conv_factor <- NA
+      formatted_conv_factor <- NA
+    }
+    else if (presentation == codelist$RS_Presentation$whole){
       conv_factor <- 1
+      formatted_conv_factor <- format(conv_factor)
     }
     else{
-      stop("Conversion factors not implemented.")
-      #when implementing conversion, check if it should also be applied to total weights
+      species <- catchsamples[i,"aphia"]
+      conv_factor <- getConversionFactor(presentation, species)
+      formatted_conv_factor <- format(conv_factor)
     }
     
-    writeline(stream, c("SA", NA,codelist$RS_Stratfification$unstratified,"U",catchsamples$aphia[i],NA,presentation,catchfraction,NA,NA,NA,"U",codelist$RS_UnitType$basket, format(round(catchsamples$catchweight[i]*1000), scientific = F), format(round(conv_factor*catchsamples$lengthsampleweight*1000), scientific = F), format(catchsamples$catchweight[i]/(conv_factor*catchsamples$lengthsampleweight), scientific = F), 1, NA,codelist$RS_SelectionMethod$systematic, lower_hierarchy, codelist$RS_Sampler$self,NA,NA,NA,NA,format(conv_factor),NA))
+    if (is.na(catchsamples$catchproducttype[i])){
+      catchconv_factor <- NA
+    }
+    else if (getPresentation(catchsamples$catchproducttype[i]) == codelist$RS_Presentation$whole){
+      catchconv_factor <- 1
+    }
+    else if (getPresentation(catchsamples$catchproducttype[i]) != codelist$RS_Presentation$whole){
+      species <- catchsamples[i,"aphia"]
+      catchpres <- getPresentation(catchsamples$sampleproducttype[i]) 
+      catchconv_factor <- getConversionFactor(catchpres, species)
+    }
+    
     individuals <- merge(nmdbiotic$ReadBioticXML_BioticData_individual.txt, catchsamples[i,])
-    
-    if (lower_hierarchy=="A"){
-      stop("Not yet supported")
+    if (nrow(individuals)==0){
+      writeline(stream, c("SA", NA,codelist$RS_Stratfification$unstratified,"U",catchsamples$aphia[i],NA,presentation,catchfraction,NA,NA,NA,"U",codelist$RS_UnitType$basket, format(round(catchsamples$catchweight[i]*catchconv_factor*1000), scientific = F), NA, NA, 0, NA, selectionmethod, lower_hierarchy, codelist$RS_Sampler$self,NA,NA,NA,NA,formatted_conv_factor,NA))
     }
-    if (lower_hierarchy=="B"){
-      stop("Not yet supported")
-    }
-    if (lower_hierarchy=="C"){
-      exportBVunstratified(stream, individuals, nmdbiotic, agingstructure = catchsamples$agingstructure[i])
-    }
-    if (lower_hierarchy=="D"){
-      stop("Not yet supported")
-    }
+    else{
+      writeline(stream, c("SA", NA,codelist$RS_Stratfification$unstratified,"U",catchsamples$aphia[i],NA,presentation,catchfraction,NA,NA,NA,"U",codelist$RS_UnitType$basket, format(round(catchsamples$catchweight[i]*catchconv_factor*1000), scientific = F), format(round(conv_factor*catchsamples$lengthsampleweight*1000), scientific = F), format((catchconv_factor*catchsamples$catchweight[i]) / (conv_factor*catchsamples$lengthsampleweight), scientific = F), 1, NA, selectionmethod, lower_hierarchy, codelist$RS_Sampler$self,NA,NA,NA,NA,formatted_conv_factor,NA))
+      
+      if (lower_hierarchy=="A"){
+        stop("Not yet supported")
+      }
+      if (lower_hierarchy=="B"){
+        stop("Not yet supported")
+      }
+      if (lower_hierarchy=="C"){
+          exportBVunstratified(stream, individuals, nmdbiotic, agingstructure = catchsamples$agingstructure[i])        
+      }
+      if (lower_hierarchy=="D"){
+        stop("Not yet supported")
+      }  
+    }    
   }
 }
 
@@ -203,4 +253,14 @@ exportHerringSL2018 <- function(stream){
 exportHerringSS <- function(stream){
   writeline(stream, c("SS", codelist$RS_Stratfification$unstratified, codelist$RS_ObservationActivityCode$haul,codelist$RS_CatchRegistration$landed,codelist$RS_ObservationType$volume,"U",codelist$RS_Clustering$unclustered,"U",codelist$RS_Sampler$self,"Herring",1,1,codelist$RS_SelectionMethod$CENSUS,NA,NA,NA,NA,NA))
   exportHerringSL2018(stream)
+}
+
+exportCommercialWhiteFishSS2018 <- function(stream){
+  writeline(stream, c("SL","Cod",2018,126436,codelist$SpecASFIS$cod,codelist$RS_CatchRegistration$landed))
+  writeline(stream, c("SL","Saithe",2018,126441,codelist$SpecASFIS$saithe,codelist$RS_CatchRegistration$landed))
+  writeline(stream, c("SL","Haddock",2018,126437,codelist$SpecASFIS$haddock,codelist$RS_CatchRegistration$landed))
+}
+exportCommercialWhiteFishSS <- function(stream){
+  writeline(stream, c("SS", codelist$RS_Stratfification$unstratified, NA, codelist$RS_CatchRegistration$landed,codelist$RS_ObservationType$volume,"U",codelist$RS_Clustering$unclustered,"U",codelist$RS_Sampler$self,"whitefish",1,1,codelist$RS_SelectionMethod$CENSUS,NA,NA,NA,NA,NA))
+  exportCommercialWhiteFishSS2018(stream)
 }

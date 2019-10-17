@@ -37,7 +37,9 @@ exportLotteryFO <- function(stream, nmdbiotic, lower_hierarchy, selectionProb, s
       stoplat <- sprintf("%2.5f", stoplat)
     }
     
-    assemblage <- targetAssemblageFunction(nmdbiotic)
+    catchsamples <- merge(nmdbiotic$ReadBioticXML_BioticData_catchsample.txt, stations[i,])
+    
+    assemblage <- targetAssemblageFunction(stations[i,], catchsamples)
     writeline(stream, c("FO",
                         codelist$RS_Stratfification$unstratified, 
                         stations$station[i], 
@@ -84,8 +86,6 @@ exportLotteryFO <- function(stream, nmdbiotic, lower_hierarchy, selectionProb, s
                         NA
     ))
     specieslistfunction(stream)
-    
-    catchsamples <- merge(nmdbiotic$ReadBioticXML_BioticData_catchsample.txt, stations[i,])
     
     exportSA(stream, catchsamples, nmdbiotic, lower_hierarchy, codelist$RS_CatchFraction$landed)
   }

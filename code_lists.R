@@ -23,19 +23,26 @@ codelist$RS_SelectionMethod$SRSWR<- "SRSWR"
 codelist$RS_SelectionMethod$SRSWOR<- "SRSWOR"
 codelist$RS_SelectionMethod$CENSUS<- "CENSUS"
 codelist$RS_SelectionMethod$systematic<- "SYSS"
+codelist$RS_SelectionMethod$expert <- "NPEJ"
 codelist$RS_SelectionMethod$UPSWOR <-"UPSWOR"
 codelist$RS_LowerHierarchy<-list()
 codelist$RS_LowerHierarchy$BVonly<-"C"
 codelist$RS_UpperHierarchy<-list()
 codelist$RS_UpperHierarchy$h13<-"13"
+codelist$RS_UpperHierarchy$h5<-"5"
 codelist$ISO_3166<-list()
 codelist$ISO_3166$norway<-"NO"
 codelist$SpecASFIS<-list()
 codelist$SpecASFIS$herring <- "HER"
+codelist$SpecASFIS$cod <- "COD"
+codelist$SpecASFIS$saithe <- "POK"
+codelist$SpecASFIS$haddock <- "HAD"
 codelist$RS_ObservationType<-list()
 codelist$RS_ObservationType$volume <- "vol"
 codelist$RS_Presentation <- list()
 codelist$RS_Presentation$whole <- "Whole"
+codelist$RS_Presentation$gutted <- "Gutted"
+codelist$RS_Presentation$headless <- "Headless"
 codelist$RS_UnitType<-list()
 codelist$RS_UnitType$number <- "Number"
 codelist$RS_UnitType$kg <- "Kg"
