@@ -31,6 +31,7 @@ warning("Remove self-fished juksa")
 warning("Put in proper target assemblage")
 warning("Finish species list")
 warning("buyer id")
+warning("Empty strata not handled. pb gear and quarter ? Introduce if strata totals are introduced")
 
 source("portsampling_conversion.R")
 exportPortSamplingRDBES("portsampling_H5.csv", pb2018, exportCommercialWhiteFishSS, 2018, "Port sampling No 64 Lat", "Norwegian coastal fleet, No 64 Lat, landing fresh / unconserved whitefish", generateTargetAssemblageSpecified("DEF"))

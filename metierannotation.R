@@ -87,8 +87,45 @@ getGear <- function(NMDreferenceGearCode){
   if (NMDreferenceGearCode %in% c(3712,3710)){
     return(codelist$GearType$purseseine)
   }
+  if (NMDreferenceGearCode %in% c(3100)){
+    return(codelist$GearType$ottertrawlbottom) 
+  }
+  if (NMDreferenceGearCode %in% c(3400)){
+    warning("exporting 3400 as OTB")
+    return(codelist$GearType$ottertrawlbottom) 
+  }
   if (NMDreferenceGearCode %in% c(3500)){
     return(codelist$GearType$pelagictrawl)
+  }
+  if (NMDreferenceGearCode %in% c(3600)){
+    return(codelist$GearType$scottishseine)
+  }
+  if (NMDreferenceGearCode %in% c(5100)){
+    return(codelist$GearType$setlongline)
+  }
+  if (NMDreferenceGearCode %in% c(5101)){
+    return(codelist$GearType$setlongline)
+  }
+  if (NMDreferenceGearCode %in% c(5110)){
+    return(codelist$GearType$setlongline)
+  }
+  if (NMDreferenceGearCode %in% c(5111)){
+    return(codelist$GearType$setlongline)
+  }
+  if (NMDreferenceGearCode %in% c(5210)){
+    return(codelist$GearType$mechjig)
+  }
+  if (NMDreferenceGearCode %in% c(5211)){
+    return(codelist$GearType$mechjig)
+  }
+  if (NMDreferenceGearCode %in% c(5212)){
+    return(codelist$GearType$manhjig)
+  }
+  if (NMDreferenceGearCode %in% c(4000)){
+    return(codelist$GearType$gillnetunspecified)
+  }
+  if (NMDreferenceGearCode %in% c(4110:4129, 4140:4149)){
+    return(codelist$GearType$setgillnet)
   }
   else{
     stop(paste("NMD reference gear code ", NMDreferenceGearCode, "not supported."))
@@ -97,13 +134,100 @@ getGear <- function(NMDreferenceGearCode){
 
 #' Look up mesh size for gear code
 #' @param NMDreferenceGearCode gear codes defined in NMD reference (NMD biotic)
-#' @return may return NA, if mesh size not defined for gear code
+#' @return may return NA, if mesh size not defined for gear code, or if mesh size is not specified for gear code
 getMeshSize <- function(NMDreferenceGearCode){
   if (NMDreferenceGearCode %in% c(3712,3710)){
     return(NA)
   }
+  if (NMDreferenceGearCode %in% c(3100)){
+    return(NA) 
+  }
+  if (NMDreferenceGearCode %in% c(3400)){
+    return(NA)
+  }
   if (NMDreferenceGearCode %in% c(3500)){
     return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(3600)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(5100)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(5101)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(5110)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(5111)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(5210)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(5211)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(5212)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(4000)){
+    return(NA) #upsesifisert
+  }
+  if (NMDreferenceGearCode %in% c(4110)){
+    return(NA) #upsesifisert
+  }
+  if (NMDreferenceGearCode %in% c(4113)){
+    return(2*627.5/(6*3/4) ) #6 3/4 omfar
+  }
+  if (NMDreferenceGearCode %in% c(4114)){
+    return(2*627.5/7 ) #7 omfar
+  }
+  if (NMDreferenceGearCode %in% c(4115)){
+    return(2*627.5/10 ) #10 omfar
+  }
+  if (NMDreferenceGearCode %in% c(4120)){
+    return(2*627.5/7 ) #7 omfar
+  }
+  if (NMDreferenceGearCode %in% c(4121)){
+    return(2*627.5/9 ) #9 omfar
+  }
+  if (NMDreferenceGearCode %in% c(4123)){
+    return(76*2 ) #76 maskevidde
+  }
+  if (NMDreferenceGearCode %in% c(4124)){
+    return(110*2 ) #110 maskevidde
+  }
+  if (NMDreferenceGearCode %in% c(4125)){
+    return(84*2 ) #84 maskevidde
+  }
+  if (NMDreferenceGearCode %in% c(4126)){
+    return(66*2 ) #66 maskevidde
+  }
+  if (NMDreferenceGearCode %in% c(4127)){
+    return(96*2) #96 maskevidde
+  }
+  if (NMDreferenceGearCode %in% c(4128)){
+    return(105*2) #105 maskevidde
+  }
+  if (NMDreferenceGearCode %in% c(4140)){
+    return(70*2 ) #70 halvmaske
+  }
+  if (NMDreferenceGearCode %in% c(4141)){
+    return(80*2) #80 halvmaske
+  }
+  if (NMDreferenceGearCode %in% c(4142)){
+    return(90*2) #90 halvmaske
+  }
+  if (NMDreferenceGearCode %in% c(4143)){
+    return(100*2) #100 halvmaske
+  }
+  if (NMDreferenceGearCode %in% c(4144)){
+    return(110*2 ) #110 halvmaske
+  }
+  if (NMDreferenceGearCode %in% c(4145)){
+    return(120*2 ) #120 halvmaske
   }
   else{
     stop(paste("NMD reference gear code ", NMDreferenceGearCode, "not supported."))
@@ -112,13 +236,49 @@ getMeshSize <- function(NMDreferenceGearCode){
 
 #' Looknup selectivity device for gear code
 #' @param NMDreferenceGearCode gear codes defined in NMD reference (NMD biotic)
-#' @return may return NA, if selectivity device is not defined for gear code
+#' @return may return NA, if selectivity device is not defined for gear code, or if use of selectivity device is not specified for gear code
 getSelDev <- function(NMDreferenceGearCode){
   if (NMDreferenceGearCode %in% c(3712,3710)){
   return(0) 
-}
+  }
+  if (NMDreferenceGearCode %in% c(3100)){
+    return(NA) 
+  }
+  if (NMDreferenceGearCode %in% c(3400)){
+    return(NA)
+  }
   if (NMDreferenceGearCode %in% c(3500)){
     return(NA) 
+  }
+  if (NMDreferenceGearCode %in% c(3600)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(5100)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(5101)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(5110)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(5111)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(5210)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(5211)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(5212)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(4000)){
+    return(NA) #upsesifisert
+  }
+  if (NMDreferenceGearCode %in% c(4110:4128, 4140:4149)){
+    return(NA)
   }
   else{
     stop(paste("NMD reference gear code ", NMDreferenceGearCode, "not supported."))
@@ -127,12 +287,48 @@ getSelDev <- function(NMDreferenceGearCode){
 
 #' Lookup selectivity device mesh size for gear code
 #' @param NMDreferenceGearCode gear codes defined in NMD reference (NMD biotic)
-#' @return may return NA, if selectivity device is not defined for gear code
+#' @return may return NA, if selectivity device is not defined for gear code, or if use of selectivity device is not specified by gear code
 getSelDevMeshSize <- function(NMDreferenceGearCode){
+  if (NMDreferenceGearCode %in% c(3100)){
+    return(NA) 
+  }
+  if (NMDreferenceGearCode %in% c(3400)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(3500)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(3600)){
+    return(NA)
+  }
   if (NMDreferenceGearCode %in% c(3712,3710)){
     return(0) 
   }
-  if (NMDreferenceGearCode %in% c(3500)){
+  if (NMDreferenceGearCode %in% c(5100)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(5101)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(5110)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(5111)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(5210)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(5211)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(5212)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(4000)){
+    return(NA) #upsesifisert
+  }
+  if (NMDreferenceGearCode %in% c(4110:4129, 4140:4149)){
     return(NA)
   }
   else{

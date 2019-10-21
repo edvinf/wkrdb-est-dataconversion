@@ -23,17 +23,21 @@ if (file.exists(icesareafilepath)){
 #
 # Annotate based on position
 #
-
+warning("GetEcoZone not implemented")
 #' Looks up Economic zone for a position
 #' @param lat latitude WGS84
 #' @param lon longitue WGS84
-getEcoZone <- function(lat, lon){warning("GetEcoZone not implemented");return(NA)}
+getEcoZone <- function(lat, lon){return(NA)}
 
 #Mandatory
 #' Looks up DCR area level 3 for a position
 #' @param lat latitude WGS84
 #' @param lon longitue WGS84
 getDCRareaLvl3 <- function(lat, lon){
+  if (is.na(lat) | is.na(lon)){
+    warning("NA coordinates")
+    return(NA)
+  }
   if (is.null(icesArea)){
     warning("ICES polygon file not available")
     return(NA)  
@@ -51,6 +55,10 @@ getDCRareaLvl3 <- function(lat, lon){
 #' @param lat latitude WGS84
 #' @param lon longitue WGS84
 getDCRareaLvl5 <- function(lat, lon){
+  if (is.na(lat) | is.na(lon)){
+    warning("NA coordinates")
+    return(NA)
+  }
   if (is.null(icesArea)){
     warning("ICES polygon file not available")
     return(NA)  
@@ -66,6 +74,10 @@ getDCRareaLvl5 <- function(lat, lon){
 #' @param lat latitude WGS84
 #' @param lon longitue WGS84
 getFDIRarea <- function(lat, lon){
+  if (is.na(lat) | is.na(lon)){
+    warning("NA coordinates")
+    return(NA)
+  }
   if (is.null(fdir)){
     warning("FDIR polygon file not available")
     return(NA)  
@@ -81,6 +93,10 @@ getFDIRarea <- function(lat, lon){
 #' @param lat latitude WGS84
 #' @param lon longitue WGS84
 getFDIRlocation <- function(lat, lon){
+  if (is.na(lat) | is.na(lon)){
+    warning("NA coordinates")
+    return(NA)
+  }
   if (is.null(fdir)){
     warning("FDIR polygon file not available")
     return(NA)  

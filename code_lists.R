@@ -65,6 +65,13 @@ codelist$GearType <- list()
 codelist$GearType$purseseine <- "PS"
 codelist$GearType$purseseinelampara <- "LA"
 codelist$GearType$pelagictrawl <- "OTM"
+codelist$GearType$ottertrawlbottom <- "OTB"
+codelist$GearType$setgillnet <- "GNS"
+codelist$GearType$gillnetunspecified <- "GEN"
+codelist$GearType$setlongline <- "LLS"
+codelist$GearType$scottishseine <- "SSC"
+codelist$GearType$mechjig <- "LHM"
+codelist$GearType$manhjig <- "LHP"
 codelist$RS_Stratfification <- list()
 codelist$RS_Stratfification$stratified <- "Yes"
 codelist$RS_Stratfification$unstratified <- "No"

@@ -1,97 +1,6 @@
 source("data_conversion.R")
+source("strataCodingPortSamling.R")
 library(data.table)
-
-#' Export FO lines and lower hiearchy lines for lottery sampling.
-#' @description 
-#'  Fishing operations (FO) are treated as unstratified
-#'  Catchfracrions are treated as landed.
-#' @param stream stream to write output to
-#' @param nmdbiotic IMR biotic data format as formated by RStox parsing functions.
-#' @param specieslistfunction function for export species list and species list details
-#' @param lower_hierarchy code for which lower hiearchy to use for export of fish measurements
-#' @param selectionProb data frame mapping hauls to selection probabilities. Contains columns: missiontype, missionnumber, platform, startyear, serialnumber, selectionprobability, where selectionprobability is the probability of selecting the haul and the other columns are for identifying a haul in nmdbiotic.
-#' @param targetAssemblageFunction function for assigning target assemblage, described by the target function assemblage contract in metierannotatin.R
-exportLotteryFO <- function(stream, nmdbiotic, lower_hierarchy, selectionProb, specieslistfunction, targetAssemblageFunction){
-  
-  stations <- merge(nmdbiotic$ReadBioticXML_BioticData_fishstation.txt, selectionProb)
-  
-  for (i in 1:nrow(stations)){
-    
-    fdirarea <- NA
-    #Didn1t validate leave out for now
-    #Get area and location code defined by Norwegian Directorate of fisheries
-    #if (!is.na(stations$system[i]) & stations$system[i]=="2"){
-    #  fdirarea <- formatFdirArea(stations$area[i], stations$location[i])      
-    #}
-    #if (is.na(fdirarea)){
-    #  area <- getFDIRarea(stations$latitudestart[i], stations$longitudestart[i])
-    #  location <- getFDIRlocation(stations$latitudestart[i], stations$longitudestart[i])
-    #  fdirarea <- formatFdirArea(area, location)      
-    #}
-    
-    stoplon <- stations$longitudeend[i]
-    if (!is.na(stoplon)){
-      stoplon <- sprintf("%2.5f", stoplon)  
-    }
-    stoplat <-stations$latitudeend[i]
-    if (!is.na(stoplat)){
-      stoplat <- sprintf("%2.5f", stoplat)
-    }
-    
-    catchsamples <- merge(nmdbiotic$ReadBioticXML_BioticData_catchsample.txt, stations[i,])
-    
-    assemblage <- targetAssemblageFunction(stations[i,], catchsamples)
-    writeline(stream, c("FO",
-                        codelist$RS_Stratfification$unstratified, 
-                        stations$station[i], 
-                        "U", 
-                        codelist$RS_Clustering$unclustered, 
-                        "U",
-                        codelist$RS_Sampler$self,
-                        codelist$RS_AggregationLevel$haul,
-                        codelist$RS_FishingValidity$valid,
-                        codelist$RS_CatchRegistration$landed,
-                        stations$stationstartdate[i],
-                        stations$stationstarttime[i],
-                        stations$stationstartdate[i], #mandatory, putting in startdate for now. stations$stationstopdate[i],
-                        stations$stationstoptime[i],
-                        NA,
-                        sprintf("%2.5f", stations$latitudestart[i]),
-                        sprintf("%2.5f", stations$longitudestart[i]),
-                        stoplat,
-                        stoplon,
-                        getEcoZone(stations$latitudestart[i], stations$longitudestart[i]),
-                        getDCRareaLvl3(stations$latitudestart[i], stations$longitudestart[i]),
-                        getDCRareaLvl5(stations$latitudestart[i], stations$longitudestart[i]),
-                        fdirarea,
-                        NA,
-                        getFishingDepth(stations$fishingdepthmean[i],stations$fishingdepthmin[i], stations$fishingdepthmax[i], stations$fishingdepthstart[i], stations$fishingdepthstop[i]),
-                        getBottomDepth(stations$bottomdepthmean[i], stations$bottomdepthstart[i], stations$bottomdepthstop[i]),
-                        NA,
-                        getMetierLvl5(stations$gear[i], assemblage),
-                        getMetierLvl6(stations$gear[i], assemblage),
-                        getGear(stations$gear[i]),
-                        getMeshSize(stations$gear[i]),
-                        getSelDev(stations$gear[i]),
-                        getSelDevMeshSize(stations$gear[i]),
-                        assemblage,
-                        codelist$RS_ObservationCode$hauling,
-                        NA,
-                        NA,
-                        format(stations$selectionprobability[i]),
-                        codelist$RS_SelectionMethod$UPSWOR,
-                        NA,
-                        NA,
-                        NA,
-                        NA,
-                        NA
-    ))
-    specieslistfunction(stream)
-    
-    exportSA(stream, catchsamples, nmdbiotic, lower_hierarchy, codelist$RS_CatchFraction$landed)
-  }
-  
-}
 
 #' Export OS lines and lower hiearchy lines for port sampling.
 #' @description 
@@ -115,39 +24,22 @@ exportPortSamplingOS <- function(stream, nmdbiotic, lower_hierarchy, specieslist
 
 exportPortSamplingOSstrata <- function(stream, nmdbiotic, stations, lower_hierarchy, specieslistfunction, targetAssemblageFunction, strata){
   buyerid <- stations$landingsite
-  buyerid[is.na(buyerid)] <- paste("samp", stations[is.na(buyerid), "stationstartdate"])
+  buyerid[is.na(buyerid)] <- paste("samp", stations[is.na(buyerid), "stationstopdate"])
 
-  stop("Need to iterate of port days, in stead")
-  for (i in 1:nrow(stations)){
+  stations$port <- buyerid
+  stations$portday <- paste(buyerid, stations$stationstopdate, sep=":")
+  
+  for (p in unique(stations$portday)){
     
-    #Get area and location code defined by Norwegian Directorate of fisheries
-    #if (!is.na(stations$system[i]) & stations$system[i]=="2"){
-    #  fdirarea <- formatFdirArea(stations$area[i], stations$location[i])      
-    #}
-    #if (is.na(fdirarea)){
-    #  area <- getFDIRarea(stations$latitudestart[i], stations$longitudestart[i])
-    #  location <- getFDIRlocation(stations$latitudestart[i], stations$longitudestart[i])
-    #  fdirarea <- formatFdirArea(area, location)      
-    #}
-    
-    stoplon <- stations$longitudeend[i]
-    if (!is.na(stoplon)){
-      stoplon <- sprintf("%2.5f", stoplon)  
-    }
-    stoplat <-stations$latitudeend[i]
-    if (!is.na(stoplat)){
-      stoplat <- sprintf("%2.5f", stoplat)
-    }
-    
-    catchsamples <- merge(nmdbiotic$ReadBioticXML_BioticData_catchsample.txt, stations[i,])
-    
-    assemblage <- targetAssemblageFunction(stations[i,], catchsamples)
+    portdaystations <- stations[stations$portday == p,]
+    port <- portdaystations[1, "port"]
+    date <- portdaystations[1, "stationstopdate"]
     
     writeline(stream, c("OS",
-                        buyerid[i],
+                        port,
                         codelist$RS_Stratfification$stratified, 
-                        getLoCode(stations$landingsite[i]),
-                        stations$stationstartdate[i],
+                        getLoCode(port),
+                        date,
                         NA,
                         strata, 
                         codelist$RS_Clustering$unclustered, 
@@ -156,7 +48,7 @@ exportPortSamplingOSstrata <- function(stream, nmdbiotic, stations, lower_hierar
                         NA,
                         NA,
                         NA, #n total
-                        length(unique(paste(buyerid, stations$startdate[i]))), #n sampled
+                        length(unique(stations$portday)), #n sampled
                         NA,
                         codelist$RS_SelectionMethod$expert,
                         NA, #locType
@@ -167,8 +59,11 @@ exportPortSamplingOSstrata <- function(stream, nmdbiotic, stations, lower_hierar
                         NA
     ))
     
-    stop("Iterate over each station in port-day, support gear stratification")
-    exportPortSamplingLE(stream, nmdbiotic, stations[i,], catchsamples, lower_hierarchy, specieslistfunction, targetAssemblageFunction)
+    for (gearstrata in getPbGearStrata()){
+      stratastations <- portdaystations[portdaystations$gear %in% getPbStratumGear(gearstrata),]
+      catchsamples <- merge(nmdbiotic$ReadBioticXML_BioticData_catchsample.txt, stratastations)  
+      exportPortSamplingLEstrata(stream, nmdbiotic, stratastations, catchsamples, lower_hierarchy, specieslistfunction, targetAssemblageFunction, gearstrata)
+    }
   }
 }
 
@@ -177,16 +72,75 @@ exportPortSamplingOSstrata <- function(stream, nmdbiotic, stations, lower_hierar
 #'  Catchfractions are treated as landed.
 #' @param stream stream to write output to
 #' @param nmdbiotic IMR biotic data format as formated by RStox parsing functions.
-#' @param station
+#' @param stations all landing events sampled in a given port day and strata
 #' @param catchsammples
 #' @param specieslistfunction function for export species list and species list details
 #' @param lower_hierarchy code for which lower hiearchy to use for export of fish measurements
 #' @param targetAssemblageFunction function for assigning target assemblage, described by the target function assemblage contract in metierannotatin.R
-exportPortSamplingLE <- function(stream, nmdbiotic, station, catchsamples, lower_hierarchy, specieslistfunction, targetAssemblageFunction){
-  writeline(stream, c("LE"
-                      ))
-  specieslistfunction(stream)
-  exportSA(stream, catchsamples, nmdbiotic, lower_hierarchy, codelist$RS_CatchFraction$landed, codelist$RS_SelectionMethod$expert)
+#' @param stratum the stratum LE record should be exported for. If null, LE will be exported as unstratified
+exportPortSamplingLEstrata <- function(stream, nmdbiotic, stations, catchsamples, lower_hierarchy, specieslistfunction, targetAssemblageFunction, stratum=NULL){
+  
+  if (nrow(stations) == 0){
+    if (!is.null(stratum)){
+      #handle empty strata when totals are passed 
+    }
+    return()
+  }
+  
+  if (is.null(stratum)){
+    stratum = "U"
+  }
+  buyerid <- stations$landingsite
+  buyerid[is.na(buyerid)] <- paste("samp", stations[is.na(buyerid), "stationstopdate"])
+  
+  for (i in 1:nrow(stations)){
+    station <- stations[i,]    
+    stationCatchsamples <- merge(station, catchsamples)
+    assemblage <- targetAssemblageFunction(station, stationCatchsamples)
+
+    writeline(stream, c("LE",
+                        codelist$RS_Stratfification$stratified,
+                        station$station,
+                        NA,
+                        stratum,
+                        codelist$RS_Clustering$unclustered,
+                        "U",
+                        codelist$RS_Sampler$observer,
+                        codelist$YesNoFields$no,
+                        codelist$RS_CatchRegistration$landed,
+                        getLoCode(buyerid),
+                        NA, #locType
+                        codelist$ISO_3166$norway,
+                        station$stationstopdate,
+                        NA,
+                        getEcoZone(station$latitudestart, station$longitudestart),
+                        getDCRareaLvl3(station$latitudestart, station$longitudestart),
+                        getDCRareaLvl5(station$latitudestart, station$longitudestart),
+                        NA, #subrect fdir area ?
+                        NA,
+                        getMetierLvl5(station$gear, assemblage),
+                        getMetierLvl6(station$gear, assemblage),
+                        getGear(station$gear),
+                        getMeshSize(station$gear),
+                        getSelDev(station$gear),
+                        getSelDevMeshSize(station$gear),
+                        assemblage,
+                        NA, #LE total
+                        nrow(stations),
+                        NA,
+                        codelist$RS_SelectionMethod$expert,
+                        NA,
+                        NA,
+                        NA,
+                        NA,
+                        NA,
+                        NA
+                        
+    ))
+    specieslistfunction(stream)
+    exportSA(stream, stationCatchsamples, nmdbiotic, lower_hierarchy, codelist$RS_CatchFraction$landed, codelist$RS_SelectionMethod$expert)  
+  }
+  
 }
 
 #' 

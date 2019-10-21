@@ -207,7 +207,7 @@ exportBVunstratified <- function(stream, individuals, nmdbiotic, fishobservation
     
     fishnumber <- individuals$specimenid[i]
     sampler <- codelist$RS_Sampler$observer
-    stratification <- 909 #codelist$RS_Stratfification$unstratified
+    stratification <- codelist$RS_Stratfification$unstratified
     unitscalelist <- "A"
     stratum <- "U"
     
