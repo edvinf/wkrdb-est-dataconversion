@@ -119,7 +119,8 @@ exportPortSamplingLEstrata <- function(stream, nmdbiotic, stations, catchsamples
                         getDCRareaLvl3(station$latitudestart, station$longitudestart),
                         getDCRareaLvl5(station$latitudestart, station$longitudestart),
                         NA, #subrect fdir area ?
-                        NA,
+                        NA, #natcat
+                        NA, #fu
                         getMetierLvl5(station$gear, assemblage),
                         getMetierLvl6(station$gear, assemblage),
                         getGear(station$gear),
