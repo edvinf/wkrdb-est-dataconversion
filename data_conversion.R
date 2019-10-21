@@ -188,11 +188,26 @@ exportSA <- function(stream, catchsamples, nmdbiotic, lower_hierarchy, catchfrac
     }
     
     individuals <- merge(nmdbiotic$ReadBioticXML_BioticData_individual.txt, catchsamples[i,])
+    totalweight <- round(catchsamples$catchweight[i]*catchconv_factor*1000)
+    sampleweight <- round(conv_factor*catchsamples$lengthsampleweight[i]*1000)
+    formatedtotalweight <- NA
+    if (!is.na(totalweight)){
+      formatedtotalweight <- format(totalweight, scientific = F)
+    }
+    formatedsampleweight <- NA
+    if (!is.na(sampleweight)){
+      formatedsampleweight <- format(sampleweight, scientific = F)
+    }
+    formatedNbaskets <- NA
+    if (!is.na(formatedsampleweight) & !is.na(formatedtotalweight)){
+      formatedNbaskets <- format(totalweight / sampleweight, scientific = F)
+    }
+      
     if (nrow(individuals)==0){
-      writeline(stream, c("SA", NA,codelist$RS_Stratfification$unstratified,"U",catchsamples$aphia[i],NA,presentation,catchfraction,NA,NA,NA,"U",codelist$RS_UnitType$basket, format(round(catchsamples$catchweight[i]*catchconv_factor*1000), scientific = F), NA, NA, 0, NA, selectionmethod, lower_hierarchy, codelist$RS_Sampler$self,NA,NA,NA,NA,formatted_conv_factor,NA))
+      writeline(stream, c("SA", NA,codelist$RS_Stratfification$unstratified,"U",catchsamples$aphia[i],NA,presentation,catchfraction,NA,NA,NA,"U",codelist$RS_UnitType$basket, formatedtotalweight, NA, NA, 0, NA, NA, NA, codelist$RS_Sampler$self,NA,NA,NA,NA,formatted_conv_factor,NA))
     }
     else{
-      writeline(stream, c("SA", NA,codelist$RS_Stratfification$unstratified,"U",catchsamples$aphia[i],NA,presentation,catchfraction,NA,NA,NA,"U",codelist$RS_UnitType$basket, format(round(catchsamples$catchweight[i]*catchconv_factor*1000), scientific = F), format(round(conv_factor*catchsamples$lengthsampleweight*1000), scientific = F), format((catchconv_factor*catchsamples$catchweight[i]) / (conv_factor*catchsamples$lengthsampleweight), scientific = F), 1, NA, selectionmethod, lower_hierarchy, codelist$RS_Sampler$self,NA,NA,NA,NA,formatted_conv_factor,NA))
+      writeline(stream, c("SA", NA,codelist$RS_Stratfification$unstratified,"U",catchsamples$aphia[i],NA,presentation,catchfraction,NA,NA,NA,"U",codelist$RS_UnitType$basket, formatedtotalweight, formatedsampleweight, formatedNbaskets, 1, NA, selectionmethod, lower_hierarchy, codelist$RS_Sampler$self,NA,NA,NA,NA,formatted_conv_factor,NA))
       
       if (lower_hierarchy=="A"){
         stop("Not yet supported")
