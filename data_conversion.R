@@ -128,11 +128,25 @@ getSex <-function(NMDreferenceSex){
   }
 }
 
+warning("Lookup for vessel details is not implemented.")
 #' Export VD line for RDBES
 #' @param stream
 #' @param platformid code for platform in NMD reference (used by NMD biotic)
-exportVesselDetails(stream, platformid){
-  stop("exportVesselDetails not implemented")
+#' @param fingerprint identifies public key to use for encryption (see gpg_list_keys())
+exportVesselDetails <- function(stream, platformid, fingerprint="AB4202BCE9D9F3CF52A3B8B1CB15889098925696"){
+  
+  encryptedplatform <- gpg_encrypt(charToRaw(as.character(platformid)), receiver = fingerprint)
+  encryptedplatform <- paste(charToRaw(encryptedplatform), collapse=":")
+  writeline(stream, c("VD",
+                      encryptedplatform,
+                      NA,
+                      NA,
+                      NA,
+                      NA,
+                      NA,
+                      NA,
+                      NA,
+                      NA))
 }
 
 #' Export SA lines for RDBES
