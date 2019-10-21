@@ -128,10 +128,17 @@ getSex <-function(NMDreferenceSex){
   }
 }
 
+#' Export VD line for RDBES
+#' @param stream
+#' @param platformid code for platform in NMD reference (used by NMD biotic)
+exportVesselDetails(stream, platformid){
+  stop("exportVesselDetails not implemented")
+}
+
 #' Export SA lines for RDBES
 #' @details 
 #'  Assumes no replicate sampels were taken from catch.
-#' @param catchsamples data fram of catchsamples to process (subset of those found in nmdbiotic)
+#' @param catchsamples data table of catchsamples to process (subset of those found in nmdbiotic)
 #' @param nmdbiotic IMR biotic data format as formated by RStox parsing functions (for the entire exported data set).
 #' @param lower_hierarchy code for which lower hiearchy to use for export of fish measurements
 #' @param catchfraction the fraction of the catch that was sampled code as RS_CatchFraction

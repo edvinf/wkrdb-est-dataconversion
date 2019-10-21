@@ -98,6 +98,8 @@ exportPortSamplingLEstrata <- function(stream, nmdbiotic, stations, catchsamples
     stationCatchsamples <- merge(station, catchsamples)
     assemblage <- targetAssemblageFunction(station, stationCatchsamples)
 
+    exportVesselDetails(stream, station$catchplatform)
+    
     writeline(stream, c("LE",
                         codelist$RS_Stratfification$stratified,
                         station$station,
