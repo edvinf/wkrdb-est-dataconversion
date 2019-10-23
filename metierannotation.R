@@ -4,12 +4,13 @@
 #'
 #'
 
-
+warning("Simplistic metier lvl 5 impl")
 #' Get metier level 5 for gear code and target assemblage
 #' @param NMDreferenceGearCode gear codes defined in NMD reference (NMD biotic)
 #' @param targetAssemblage target assemblage to use
 #' @return may return NA, if metier could not be defined
 getMetierLvl5 <- function(NMDreferenceGearCode, targetAssemblage){
+  # Fix with lookup table from prepReca (possibly extract to metier annotation tool). Need to set to legal metiers based on gear and assemblage
   gear <- getGear(NMDreferenceGearCode)
   
   if (is.na(targetAssemblage)){
