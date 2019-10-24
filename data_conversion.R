@@ -1,7 +1,7 @@
 #
 # Generic export functions
 #
-
+library(data.table)
 source("code_lists.R")
 source("geographic_lookup.R")
 source("metierannotation.R")
@@ -14,13 +14,75 @@ writeline <- function(stream, fields){
   write(fields, sep=",", file=stream, ncolumns = length(fields))
 }
 
-warning("getConversionFactor not implemented")
+# need more parameters than just species
+# given factors from https://www.fiskeridir.no/Yrkesfiske/Tall-og-analyse/Omregningsfaktorer
+conversionFactors <- data.table(presentation=character(), species=character(), factor=numeric())
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$gutted), species=as.character("126436"), factor=as.numeric(1.18))) #COD
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$headless), species=as.character("126436"), factor=as.numeric(1.50))) #rounded cut
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$gutted), species=as.character("126437"), factor=as.numeric(1.14))) #HAD
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$headless), species=as.character("126437"), factor=as.numeric(1.40))) #rounded cut
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$gutted), species=as.character("126441"), factor=as.numeric(1.20))) #POK
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$headless), species=as.character("126441"), factor=as.numeric(1.35))) #rounded cut
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$gutted), species=as.character("127143"), factor=as.numeric(1.10))) #PLE
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$headless), species=as.character("127143"), factor=as.numeric(1.20))) #rounded cut
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$gutted), species=as.character("126447"), factor=as.numeric(1.20))) #USK
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$headless), species=as.character("126447"), factor=as.numeric(1.40))) #rounded cut
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$gutted), species=as.character("126461"), factor=as.numeric(1.20))) #LIN
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$headless), species=as.character("126461"), factor=as.numeric(1.40))) #rounded cut
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$gutted), species=as.character("127254"), factor=as.numeric(1.20))) #REB
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$headless), species=as.character("127254"), factor=as.numeric(1.65))) #rounded cut
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$gutted), species=as.character("127140"), factor=as.numeric(1.10))) #LEM
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$headless), species=as.character("127140"), factor=as.numeric(1.20))) #rounded cut
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$gutted), species=as.character("126555"), factor=as.numeric(1.20))) #MON
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$headless), species=as.character("126555"), factor=as.numeric(2.80))) #rounded cut
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$gutted), species=as.character("127138"), factor=as.numeric(1.10))) #HAL
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$headless), species=as.character("127138"), factor=as.numeric(1.35))) #rounded cut
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$gutted), species=as.character("126758"), factor=as.numeric(1.10))) #CAA
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$headless), species=as.character("126758"), factor=as.numeric(1.65))) #rounded cut
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$gutted), species=as.character("151324"), factor=as.numeric(1.20))) #REG
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$headless), species=as.character("151324"), factor=as.numeric(1.65))) #rounded cut
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$gutted), species=as.character("126759"), factor=as.numeric(1.10))) #CAS
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$headless), species=as.character("126759"), factor=as.numeric(1.65))) #rounded cut
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$gutted), species=as.character("127144"), factor=as.numeric(1.10))) #GHL
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$headless), species=as.character("127144"), factor=as.numeric(1.20))) #rounded cut
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$gutted), species=as.character("126440"), factor=as.numeric(1.15))) #POL
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$headless), species=as.character("126440"), factor=as.numeric(1.30))) #rounded cut
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$gutted), species=as.character("126438"), factor=as.numeric(1.20))) #WHG
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$headless), species=as.character("126438"), factor=as.numeric(1.40))) #rounded cut
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$gutted), species=as.character("126484"), factor=as.numeric(1.20))) #HKE
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$headless), species=as.character("126484"), factor=as.numeric(1.40))) #rounded cut
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$gutted), species=as.character("126459"), factor=as.numeric(1.20))) #BLI
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$headless), species=as.character("126459"), factor=as.numeric(1.40))) #rounded cut
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$gutted), species=as.character("158960"), factor=as.numeric(1.20))) #RNG
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$headless), species=as.character("158960"), factor=as.numeric(1.40))) #rounded cut
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$gutted), species=as.character("126472"), factor=as.numeric(1.20))) #RHG
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$headless), species=as.character("126472"), factor=as.numeric(1.40))) #rounded cut
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$gutted), species=as.character("126175"), factor=as.numeric(1.20))) #RED
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$headless), species=as.character("126175"), factor=as.numeric(1.65))) #rounded cut
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$gutted), species=as.character("10216"), factor=as.numeric(1.15))) #SRX
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$headless), species=as.character("10216"), factor=as.numeric(1.50))) #rounded cut
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$gutted), species=as.character("105711"), factor=as.numeric(1.15))) #SRX
+conversionFactors <- rbind(conversionFactors, data.table(presentation=as.character(codelist$RS_Presentation$headless), species=as.character("105711"), factor=as.numeric(1.50))) #rounded cut
+
 #' Returns conversion factor to whole weight
 #' @param presentation code for presentation according to RS_Presentation
 #' @param species aphia code for species
 #' @return conversion factor that can be used to estimate whole weight by multiplying with weight for the given presentation
-getConversionFactor <- function(presentation, species){
-  return(NA)
+getConversionFactor <- function(pres, spec){
+  if (is.na(pres) | is.na(spec)){
+    stop("Cannot look up conversion factors for missing species or presentation")
+  }
+  if (pres == codelist$RS_Presentation$whole){
+    return(1.0)
+  }
+  else if (pres %in% conversionFactors$presentation & spec %in% conversionFactors$species){
+    convf <- conversionFactors[pres == conversionFactors$presentation & spec == conversionFactors$species,]
+    return(convf$factor) 
+  } else{
+    warning(paste("No conversion factor available for ", pres, pres, spec))
+    return(NA)
+  }
+  
 }
 
 warning("getLoCode not implemented")
@@ -183,7 +245,7 @@ exportSA <- function(stream, catchsamples, nmdbiotic, lower_hierarchy, catchfrac
     }
     else if (getPresentation(catchsamples$catchproducttype[i]) != codelist$RS_Presentation$whole){
       species <- catchsamples[i,"aphia"]
-      catchpres <- getPresentation(catchsamples$sampleproducttype[i]) 
+      catchpres <- getPresentation(catchsamples$catchproducttype[i]) 
       catchconv_factor <- getConversionFactor(catchpres, species)
     }
     

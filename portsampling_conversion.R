@@ -1,7 +1,7 @@
 source("data_conversion.R")
 source("strataCodingPortSamling.R")
 library(data.table)
-
+library(gpg)
 #' Export OS lines and lower hiearchy lines for port sampling.
 #' @description 
 #'  Catchfractions are treated as landed.

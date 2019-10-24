@@ -27,7 +27,13 @@ pb2018$ReadBioticXML_BioticData_individual.txt <- rbind(pb2018_1$ReadBioticXML_B
 # remove one registration of intersex cod, so that we don't have to deal with code conversion
 pb2018$ReadBioticXML_BioticData_individual.txt <- pb2018$ReadBioticXML_BioticData_individual.txt[is.na(pb2018$ReadBioticXML_BioticData_individual.txt$sex) | pb2018$ReadBioticXML_BioticData_individual.txt$sex!= 3,]
 
-warning("Remove self-fished juksa")
+selffished <- pb2018$ReadBioticXML_BioticData_fishstation.txt[pb2018$ReadBioticXML_BioticData_fishstation.txt$catchplatform == pb2018$ReadBioticXML_BioticData_fishstation.txt$platform,]
+
+#Remove self-fished jig samples
+pb2018$ReadBioticXML_BioticData_fishstation.txt <- pb2018$ReadBioticXML_BioticData_fishstation.txt[!(pb2018$ReadBioticXML_BioticData_fishstation.txt$serialnumber %in% selffished$serialnumber),]
+pb2018$ReadBioticXML_BioticData_catchsample.txt <- pb2018$ReadBioticXML_BioticData_catchsample.txt[!(pb2018$ReadBioticXML_BioticData_catchsample.txt$serialnumber %in% selffished$serialnumber),]
+pb2018$ReadBioticXML_BioticData_individual.txt <- pb2018$ReadBioticXML_BioticData_individual.txt[!(pb2018$ReadBioticXML_BioticData_individual.txt$serialnumber %in% selffished$serialnumber),]
+
 warning("Put in proper target assemblage")
 warning("Finish species list")
 warning("buyer id")
