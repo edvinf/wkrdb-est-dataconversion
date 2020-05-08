@@ -65,3 +65,5 @@ codelist$RS_Clustering <- list()
 codelist$RS_Clustering$unclustered <- "No"
 codelist$EDMO <- list()
 codelist$EDMO$IMR <- "1351"
+codelist$RS_samplingSchemeType <- list()
+codelist$RS_samplingSchemeType$nationalPilot <- "National Pilot"

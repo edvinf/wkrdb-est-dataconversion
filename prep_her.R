@@ -1,9 +1,6 @@
 library(Rstox)
 library(readr)
 library(ggplot2)
-#estimate total, scaling up by trip
-
-#estimate proportion, scale up by landings
 
 #eca
 
@@ -13,12 +10,6 @@ her2018 <- Rstox::readXMLfiles(files = list(biotic=c("data/herringlot_2018.xml")
 #v<-getNMDinfo("v")
 #v <- v[v$platformNumber %in% her2018$ReadBioticXML_BioticData_fishstation.txt$catchplatform,]
 #v$REGM <- gsub(pattern = "-", "", v$Norwegian_Fisheries_Register)
-
-#landings
-l<-locale()
-l$decimal_mark <- "."
-l$encoding<-"latin1"
-landings <- read_delim("data/sild.psv", delim = "|", locale = l)
 
 table(her2018$ReadBioticXML_BioticData_catchsample.txt$catchpartnumber)
 her2018$ReadBioticXML_BioticData_catchsample.txt[her2018$ReadBioticXML_BioticData_catchsample.txt$catchpartnumber>1,c("serialnumber", "catchweight", "catchpartnumber")]
@@ -73,9 +64,9 @@ agesprlg <- agesprlg[order(as.integer(agesprlg$sampletype)),]
 #estimate probabilities from registered weights (actual probabilities was set on reported weight during haul and set quoate for the fishery and a total sampling capacity of 200? catches)
 
 herringSelectionProb2018 <- aggregate(list(catch_kg=her2018$ReadBioticXML_BioticData_catchsample.txt$catchweight), by=list(platform=her2018$ReadBioticXML_BioticData_catchsample.txt$platform, startyear=her2018$ReadBioticXML_BioticData_catchsample.txt$startyear, missiontype=her2018$ReadBioticXML_BioticData_catchsample.txt$missiontype, missionnumber=her2018$ReadBioticXML_BioticData_catchsample.txt$missionnumber, serialnumber=her2018$ReadBioticXML_BioticData_catchsample.txt$serialnumber), FUN=sum)
-#herringSelectionProb2018$selectionprobability<-herringSelectionProb2018$catch_kg/sum(landings$Rundvekt)
 # using quota for 2018
-herringSelectionProb2018$selectionprobability<-herringSelectionProb2018$catch_kg/(304500*1000)
+herringSelectionProb2018$selectionprobability <- herringSelectionProb2018$catch_kg/(304500*1000)
+herringSelectionProb2018$inclusionprobability <- (1-(1-herringSelectionProb2018$selectionprobability)**300)
 if (nrow(herringSelectionProb2018)!=nrow(her2018$ReadBioticXML_BioticData_fishstation.txt)){
   stop("Error in merging selection probabilities")
 }
@@ -90,10 +81,5 @@ her2018$ReadBioticXML_BioticData_fishstation.txt$station <- 1:nrow(her2018$ReadB
 # construct: 
 source("metierannotation.R")
 source("data_conversion.R")
+exportHerringSL2018("specieslist_herring.csv")
 exportLotteryRDBES("herringlottery_H13.csv", her2018, herringSelectionProb2018, exportHerringSS, 2018, "Pilot of Lottery-sampling herring", "Norwegian fleet > 15 m", generateTargetAssemblageSpecified("SPF"))
-warning("FOclarifyHaulN")
-warning("FOstopdate")
-warning("FOrectangle")
-warning("BVstratification")
-warning("BVunitScaleList")
-warning("BVunitValue")
