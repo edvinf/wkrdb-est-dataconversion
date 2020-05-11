@@ -28,10 +28,14 @@ codelist$RS_LowerHierarchy<-list()
 codelist$RS_LowerHierarchy$BVonly<-"C"
 codelist$RS_UpperHierarchy<-list()
 codelist$RS_UpperHierarchy$h13<-"13"
+codelist$RS_UpperHierarchy$h6<-"6"
 codelist$ISO_3166<-list()
 codelist$ISO_3166$norway<-"NO"
 codelist$SpecASFIS<-list()
 codelist$SpecASFIS$herring <- "HER"
+codelist$SpecASFIS$cod <- "COD"
+codelist$SpecASFIS$hadock <- "HAD"
+codelist$SpecASFIS$saithe <- "POK"
 codelist$RS_ObservationType<-list()
 codelist$RS_ObservationType$volume <- "vol"
 codelist$RS_Presentation <- list()
@@ -67,3 +71,4 @@ codelist$EDMO <- list()
 codelist$EDMO$IMR <- "1351"
 codelist$RS_samplingSchemeType <- list()
 codelist$RS_samplingSchemeType$nationalPilot <- "National Pilot"
+codelist$RS_samplingSchemeType$nationalMonitoring <- "National Routine"

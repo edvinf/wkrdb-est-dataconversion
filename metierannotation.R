@@ -143,6 +143,7 @@ getSelDevMeshSize <- function(NMDreferenceGearCode){
 #
 # Target assemblage contract
 # Functions for assigning target assemblage must accept one parameter 'nmdbiotic' which is IMR biotic format as returned by Rstox parsing routines. They must return a single value being a valid target assemblage
+# This abstraction will probably not be taken any further, and only used for generating constant assemblages as below.
 #
 
 #' Generates a target assembalge functions that return a specified assemblage, no mather what its arguments are

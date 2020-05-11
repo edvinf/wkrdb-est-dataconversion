@@ -323,11 +323,63 @@ exportLotteryRDBES <- function(outfile, nmdbiotic, selectionProb, speciesselecti
   close(stream)
 }
 
+
+#
+# Port sampling export function
+#
+
+exportPbDE <- function(stream, samplingschemename, samplingframedesc, year){
+  writeline(stream, c("DE", samplingschemename, codelist$RS_samplingSchemeType$nationalMonitoring, year, samplingframedesc, codelist$YesNoFields$no, codelist$RS_UpperHierarchy$h6))
+}
+
+#' Exports SD table for lottery sampling
+#' @param samplingcounty consult RDBES documentatino
+#' @param samplinginstitution consult RDBES documentatino
+exportPbSD <- function(stream, samplingcountry=codelist$ISO_3166$norway, samplinginstitution=codelist$EDMO$IMR){
+  writeline(stream, c("SD", samplingcountry, samplinginstitution))
+}
+
+#' Export FT lines and lower hiearchy lines for port sampling sampling.
+#' @description 
+#'  Fishing tripss (FT) are treated as stratified by gear
+#'  Catchfracrions are treated as landed.
+#' @param stream stream to write output to
+#' @param nmdbiotic IMR biotic data format as formated by RStox parsing functions.
+#' @param specieslistfunction function for export species list and species list details
+#' @param lower_hierarchy code for which lower hiearchy to use for export of fish measurements
+#' @param targetAssemblageFunction function for assigning target assemblage, described by the target function assemblage contract in metierannotatin.R
+exportPbFT <- function(stream, nmdbiotic, lower_hierarchy, specieslistfunction, targetAssemblageFunction){
+  warning("stratify by gear")
+  stop("Not implemented.")
+}
+
+
+#' Exports IMR port sampling to RDBES Hierarchy 6 with lower hiearchy C.
+#' @description 
+#'  Output files are compatible with RDBES and can be imported via RDBES web-interface as part of data submission
+#' @details 
+#'  This port sampling is more appropriatly mapped ti hierarchy 5, but is exportet to 6 for testing purposes
+#' @param outfile filename for writing out
+#' @param nmdbiotic IMR biotic data format as formated by RStox parsing functions.
+#' @param specieselection function for export species list and species list details. Must accept a single argument 'stream' defined as for this function. Will be called at appropriate places to write SL and SS lines. E.g: exportPbSS
+#' @param year the year of the sampling
+#' @param samplingschemename Name of the sampling program
+#' @param samplingframedesc Description of the sampling frame
+#' @param targetAssemblageFunction Function described by the target function assemblage contract in metierannotatin.R
+exportPortsamplingRDBES <- function(outfile, nmdbiotic, speciesselection, year, samplingschemename, samplingframedesc, targetAssemblageFunction){
+  stream <- file(outfile, open="w")
+  exportPbDE(stream, samplingschemename, samplingframedesc, year)
+  exportPbSD(stream)
+  exportPbFT(stream, nmdbiotic, codelist$RS_LowerHierarchy$BVonly, speciesselection, targetAssemblageFunction)
+  close(stream)
+}
+
+
 #
 # species specific functions
 #
 
-# exports species list
+# exports species list herring lottery
 exportHerringSL2018 <- function(filename, samplingcountry=codelist$ISO_3166$norway, samplinginstitution=codelist$EDMO$IMR){
   stream <- file(filename, open="w")
   writeline(stream, c("SL", samplingcountry,samplinginstitution,"Herring",2018,codelist$RS_CatchFraction$landed,codelist$SpecASFIS$herring,126417))
@@ -337,3 +389,17 @@ exportHerringSL2018 <- function(filename, samplingcountry=codelist$ISO_3166$norw
 exportHerringSS <- function(stream){
   writeline(stream, c("SS", 1, codelist$RS_Stratfification$unstratified, codelist$RS_ObservationActivityCode$haul,codelist$RS_CatchRegistration$landed,codelist$RS_ObservationType$volume,"U",codelist$RS_Clustering$unclustered,"U",codelist$RS_Sampler$self,"Herring",codelist$YesNoFields$yes,1,1,1.0,1.0,codelist$RS_SelectionMethod$CENSUS,"Herring",NA,NA,NA,NA,NA,NA))
 }
+
+# exports species list pb
+exportPbSL2018 <- function(filename, samplingcountry=codelist$ISO_3166$norway, samplinginstitution=codelist$EDMO$IMR){
+  stream <- file(filename, open="w")
+  writeline(stream, c("SL", samplingcountry,samplinginstitution,"PortSamplingCodHadPok",2018,codelist$RS_CatchFraction$landed,codelist$SpecASFIS$cod,126436))
+  writeline(stream, c("SL", samplingcountry,samplinginstitution,"PortSamplingCodHadPok",2018,codelist$RS_CatchFraction$landed,codelist$SpecASFIS$had,126437))
+  writeline(stream, c("SL", samplingcountry,samplinginstitution,"PortSamplingCodHadPok",2018,codelist$RS_CatchFraction$landed,codelist$SpecASFIS$pok,126441))
+  close(stream)
+}
+
+exportPbSS <- function(stream){
+  writeline(stream, c("SS", 1, codelist$RS_Stratfification$unstratified, codelist$RS_ObservationActivityCode$haul,codelist$RS_CatchRegistration$landed,codelist$RS_ObservationType$volume,"U",codelist$RS_Clustering$unclustered,"U",codelist$RS_Sampler$observer,"PortSamplingCodHadPok",codelist$YesNoFields$yes,1,1,1.0,1.0,codelist$RS_SelectionMethod$CENSUS,"CodHadPok",NA,NA,NA,NA,NA,NA))
+}
+
