@@ -6,6 +6,12 @@ source("code_lists.R")
 source("geographic_lookup.R")
 source("metierannotation.R")
 
+#' Make anonymized code for vessel
+#' Version for test-data only.
+encodeVessel <- function(platformCode){
+  return(as.integer(platformCode)-1000 + 42)
+}
+
 #' Writes nl terminated, comma-separated line to stream
 #' @param stream stream to write to
 #' @param fields vector of atomic elements to be written as comma-separated entries
@@ -339,18 +345,219 @@ exportPbSD <- function(stream, samplingcountry=codelist$ISO_3166$norway, samplin
   writeline(stream, c("SD", samplingcountry, samplinginstitution))
 }
 
+#' Export OS lines and lower hiearchy lines for port sampling sampling.
+#' Prepared for testing purposes. Some fields are made up.
+#' @param stream stream to write output to
+#' @param nmdbiotic IMR biotic data for the entire data set. Formated by RStox parsing functions.
+#' @param specieslistfunction function for export species list and species list details
+#' @param lower_hierarchy code for which lower hiearchy to use for export of fish measurements
+#' @param targetAssemblageFunction function for assigning target assemblage, described by the target function assemblage contract in metierannotatin.R
+exportPbOS <- function(stream, nmdbiotic, lower_hierarchy, specieslistfunction, targetAssemblageFunction){
+  stations <- nmdbiotic$ReadBioticXML_BioticData_fishstation.txt
+
+  date <- stations$stationstartdate
+  date[is.na(date)] <- stations$stationstopdate[is.na(date)]
+  date <- as.POSIXct(date)
+  
+  #assume one site pr day when site is not given
+  stations$landingsite[is.na(stations$landingsite)] <- date[is.na(stations$landingsite)]
+  stations$portday <- paste(date, stations$landingsite)
+  
+  stations$quarter <- quarters(date)
+  stations$sdate <- date
+  seqnr <- 0
+  
+  for (os in unique(stations$portday)){
+    seqnr <- seqnr + 1
+    osstations <- stations[stations$portday == os,]
+    
+    writeline(stream, c("OS",
+                        seqnr,
+                        osstations$landingsite[1],
+                        codelist$RS_Stratfification$stratified,
+                        "BGO",
+                        osstations$sdate,
+                        NA,
+                        osstations$quarter[1],
+                        codelist$RS_Clustering$unclustered,
+                        "U",
+                        codelist$RS_Sampler$observer,
+                        NA,
+                        NA,
+                        NA,
+                        NA,
+                        NA,
+                        NA,
+                        codelist$RS_SelectionMethod$systematic,
+                        osstations$serialnumber[1],
+                        codelist$RS_locationtype$port,
+                        NA,
+                        NA,
+                        NA,
+                        NA,
+                        NA,
+                        NA
+                        
+                        
+    ))
+    
+    #export trips
+    exportPbFT(stream, osstations, nmdbiotic, lower_hierarchy, specieslistfunction, targetAssemblageFunction)
+  }
+  
+}
+
 #' Export FT lines and lower hiearchy lines for port sampling sampling.
 #' @description 
 #'  Fishing tripss (FT) are treated as stratified by gear
 #'  Catchfracrions are treated as landed.
 #' @param stream stream to write output to
-#' @param nmdbiotic IMR biotic data format as formated by RStox parsing functions.
+#' @param stations stations to export
+#' @param nmdbiotic IMR biotic data for the entire data set. Formated by RStox parsing functions.
 #' @param specieslistfunction function for export species list and species list details
 #' @param lower_hierarchy code for which lower hiearchy to use for export of fish measurements
 #' @param targetAssemblageFunction function for assigning target assemblage, described by the target function assemblage contract in metierannotatin.R
-exportPbFT <- function(stream, nmdbiotic, lower_hierarchy, specieslistfunction, targetAssemblageFunction){
-  warning("stratify by gear")
-  stop("Not implemented.")
+exportPbFT <- function(stream, stations, nmdbiotic, lower_hierarchy, specieslistfunction, targetAssemblageFunction){
+  
+  seqnr <- 0
+  
+  for (i in 1:nrow(stations)){
+    
+    vesselCode <- encodeVessel(stations$platform[i])
+    stationdate <- stations$stationstartdate[i]
+    if (is.na(stationdate)){
+      stationdate <- stations$stationstopdate[i]
+    }
+    
+    seqnr <- seqnr + 1
+    writeline(stream, c("FT",
+                        vesselCode, 
+                        seqnr,
+                        codelist$RS_Stratfification$unstratified,
+                        "U",
+                        codelist$RS_Clustering$unclustered, 
+                        "U",
+                        codelist$RS_Sampler$observer,
+                        codelist$RS_Samplingtype$onshore,
+                        NA,
+                        NA,
+                        stationdate,
+                        NA,
+                        NA,
+                        stationdate,
+                        NA,
+                        NA,
+                        NA,
+                        NA,
+                        NA,
+                        codelist$RS_SelectionMethod$systematic,
+                        stations$serialnumber[i],
+                        NA,
+                        NA,
+                        NA,
+                        NA,
+                        NA,
+                        NA
+                        )
+    )
+    exportPbFO(stream, stations[i,], nmdbiotic, codelist$RS_LowerHierarchy$BVonly, specieslistfunction, targetAssemblageFunction)
+  }
+  
+}
+
+#' Export FO lines and lower hiearchy lines for Pb sampling.
+#' For test purposes, some fields may be wrong
+exportPbFO <- function(stream, stations, nmdbiotic, lower_hierarchy, specieslistfunction, targetAssemblageFunction){
+  
+  if (nrow(stations)!=1){
+    stop("")
+  }
+  
+  seqnr <- 0
+  
+  for (i in 1:nrow(stations)){
+    seqnr <- seqnr + 1
+    
+    fdirarea <- NA
+    #Didn1t validate leave out for now
+    #Get area and location code defined by Norwegian Directorate of fisheries
+    #if (!is.na(stations$system[i]) & stations$system[i]=="2"){
+    #  fdirarea <- formatFdirArea(stations$area[i], stations$location[i])      
+    #}
+    #if (is.na(fdirarea)){
+    #  area <- getFDIRarea(stations$latitudestart[i], stations$longitudestart[i])
+    #  location <- getFDIRlocation(stations$latitudestart[i], stations$longitudestart[i])
+    #  fdirarea <- formatFdirArea(area, location)      
+    #}
+    
+    stoplon <- stations$longitudeend[i]
+    if (!is.na(stoplon)){
+      stoplon <- sprintf("%2.5f", stoplon)  
+    }
+    stoplat <-stations$latitudeend[i]
+    if (!is.na(stoplat)){
+      stoplat <- sprintf("%2.5f", stoplat)
+    }
+    
+    assemblage <- targetAssemblageFunction(nmdbiotic)
+    writeline(stream, c("FO",
+                        codelist$RS_Stratfification$unstratified, 
+                        seqnr, 
+                        "U", 
+                        codelist$RS_Clustering$unclustered, 
+                        "U",
+                        codelist$RS_Sampler$observer,
+                        codelist$RS_AggregationLevel$haul,
+                        codelist$RS_FishingValidity$valid,
+                        codelist$RS_CatchRegistration$landed,
+                        stations$sdate[i], #hack, sdate was appended on levels above.
+                        stations$stationstarttime[i],
+                        stations$sdate[i], #mandatory, putting in startdate for now. stations$stationstopdate[i],
+                        stations$stationstoptime[i],
+                        NA,
+                        sprintf("%2.5f", stations$latitudestart[i]),
+                        sprintf("%2.5f", stations$longitudestart[i]),
+                        stoplat,
+                        stoplon,
+                        getEcoZone(stations$latitudestart[i], stations$longitudestart[i]),
+                        getDCRareaLvl3(stations$latitudestart[i], stations$longitudestart[i]),
+                        NA,#getDCRareaLvl5(stations$latitudestart[i], stations$longitudestart[i]),
+                        fdirarea,
+                        getFishingDepth(stations$fishingdepthmean[i],stations$fishingdepthmin[i], stations$fishingdepthmax[i], stations$fishingdepthstart[i], stations$fishingdepthstop[i]),
+                        getBottomDepth(stations$bottomdepthmean[i], stations$bottomdepthstart[i], stations$bottomdepthstop[i]),
+                        NA,
+                        getMetierLvl5(stations$gear[i], assemblage),
+                        getMetierLvl6(stations$gear[i], assemblage),
+                        getGear(stations$gear[i]),
+                        getMeshSize(stations$gear[i]),
+                        getSelDev(stations$gear[i]),
+                        getSelDevMeshSize(stations$gear[i]),
+                        assemblage,
+                        NA,
+                        NA,
+                        codelist$RS_ObservationCode$None,
+                        NA, #fishing operations total, get from logbooks
+                        NA, #fishing operations sampled, get from biotic
+                        NA,
+                        NA,
+                        codelist$RS_SelectionMethod$CENSUS,
+                        stations$serialnumber[i],
+                        NA,
+                        NA,
+                        NA,
+                        NA,
+                        NA,
+                        NA
+    ))
+    specieslistfunction(stream)
+    
+    catchsamples <- merge(nmdbiotic$ReadBioticXML_BioticData_catchsample.txt, stations[i,])
+    
+    catchsamples$sampleproducttype[is.na(catchsamples$sampleproducttype)] <- 1 #assume product type 1 if not provided
+    
+    exportSA(stream, catchsamples, nmdbiotic, lower_hierarchy, codelist$RS_CatchFraction$landed, seqnr = 1)
+  }
+  
 }
 
 
@@ -370,7 +577,7 @@ exportPortsamplingRDBES <- function(outfile, nmdbiotic, speciesselection, year, 
   stream <- file(outfile, open="w")
   exportPbDE(stream, samplingschemename, samplingframedesc, year)
   exportPbSD(stream)
-  exportPbFT(stream, nmdbiotic, codelist$RS_LowerHierarchy$BVonly, speciesselection, targetAssemblageFunction)
+  exportPbOS(stream, nmdbiotic, codelist$RS_LowerHierarchy$BVonly, speciesselection, targetAssemblageFunction)
   close(stream)
 }
 

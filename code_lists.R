@@ -62,6 +62,7 @@ codelist$GearType <- list()
 codelist$GearType$purseseine <- "PS"
 codelist$GearType$purseseinelampara <- "LA"
 codelist$GearType$pelagictrawl <- "OTM"
+codelist$GearType$longline <- "LLS"
 codelist$RS_Stratfification <- list()
 codelist$RS_Stratfification$stratified <- "Yes"
 codelist$RS_Stratfification$unstratified <- "No"
@@ -72,3 +73,7 @@ codelist$EDMO$IMR <- "1351"
 codelist$RS_samplingSchemeType <- list()
 codelist$RS_samplingSchemeType$nationalPilot <- "National Pilot"
 codelist$RS_samplingSchemeType$nationalMonitoring <- "National Routine"
+codelist$RS_Samplingtype <- list()
+codelist$RS_Samplingtype$onshore <- "On-shore"
+codelist$RS_locationtype <- list()
+codelist$RS_locationtype$port <- "port"

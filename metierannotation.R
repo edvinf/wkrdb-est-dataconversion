@@ -90,6 +90,9 @@ getGear <- function(NMDreferenceGearCode){
   if (NMDreferenceGearCode %in% c(3500)){
     return(codelist$GearType$pelagictrawl)
   }
+  if (NMDreferenceGearCode %in% c(5110)){
+    return(codelist$GearType$longline)
+  }
   else{
     stop(paste("NMD reference gear code ", NMDreferenceGearCode, "not supported."))
   }
@@ -103,6 +106,9 @@ getMeshSize <- function(NMDreferenceGearCode){
     return(NA)
   }
   if (NMDreferenceGearCode %in% c(3500)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(5110)){
     return(NA)
   }
   else{
@@ -120,6 +126,10 @@ getSelDev <- function(NMDreferenceGearCode){
   if (NMDreferenceGearCode %in% c(3500)){
     return(NA) 
   }
+  if (NMDreferenceGearCode %in% c(5110)){
+    return(NA) 
+  }
+  
   else{
     stop(paste("NMD reference gear code ", NMDreferenceGearCode, "not supported."))
   }
@@ -133,6 +143,9 @@ getSelDevMeshSize <- function(NMDreferenceGearCode){
     return(0) 
   }
   if (NMDreferenceGearCode %in% c(3500)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(5110)){
     return(NA)
   }
   else{
