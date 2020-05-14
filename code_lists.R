@@ -81,4 +81,4 @@ codelist$RS_samplingSchemeType$nationalMonitoring <- "National Routine"
 codelist$RS_Samplingtype <- list()
 codelist$RS_Samplingtype$onshore <- "On-shore"
 codelist$RS_locationtype <- list()
-codelist$RS_locationtype$port <- "port"
+codelist$RS_locationtype$port <- "Port"
