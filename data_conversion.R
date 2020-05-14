@@ -498,13 +498,12 @@ exportPbOS <- function(stream, nmdbiotic, lower_hierarchy, specieslistfunction, 
 
   date <- stations$stationstartdate
   date[is.na(date)] <- stations$stationstopdate[is.na(date)]
-  date <- as.POSIXct(date)
   
   #assume one site pr day when site is not given
   stations$landingsite[is.na(stations$landingsite)] <- date[is.na(stations$landingsite)]
   stations$portday <- paste(date, stations$landingsite)
   
-  stations$quarter <- quarters(date)
+  stations$quarter <- quarters(as.POSIXct(date))
   stations$sdate <- date
   seqnr <- 0
   
@@ -517,7 +516,7 @@ exportPbOS <- function(stream, nmdbiotic, lower_hierarchy, specieslistfunction, 
                         osstations$landingsite[1],
                         codelist$RS_Stratfification$stratified,
                         "BGO",
-                        osstations$sdate,
+                        osstations$sdate[1],
                         NA,
                         osstations$quarter[1],
                         codelist$RS_Clustering$unclustered,
@@ -538,7 +537,6 @@ exportPbOS <- function(stream, nmdbiotic, lower_hierarchy, specieslistfunction, 
                         NA,
                         NA,
                         NA
-                        
                         
     ))
     
