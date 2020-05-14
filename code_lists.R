@@ -40,6 +40,8 @@ codelist$RS_ObservationType<-list()
 codelist$RS_ObservationType$volume <- "vol"
 codelist$RS_Presentation <- list()
 codelist$RS_Presentation$whole <- "Whole"
+codelist$RS_Presentation$guttedwHead <- "Gutted"
+codelist$RS_Presentation$guttedwoHead <- "Headless"
 codelist$RS_UnitType<-list()
 codelist$RS_UnitType$number <- "Number"
 codelist$RS_UnitType$kg <- "Kg"
@@ -63,6 +65,9 @@ codelist$GearType$purseseine <- "PS"
 codelist$GearType$purseseinelampara <- "LA"
 codelist$GearType$pelagictrawl <- "OTM"
 codelist$GearType$longline <- "LLS"
+codelist$GearType$setnet <- "GNS"
+codelist$GearType$mechjig <- "LHM"
+codelist$GearType$demershalseine <- "SSC"
 codelist$RS_Stratfification <- list()
 codelist$RS_Stratfification$stratified <- "Yes"
 codelist$RS_Stratfification$unstratified <- "No"

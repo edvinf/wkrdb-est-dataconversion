@@ -6,6 +6,120 @@ source("code_lists.R")
 source("geographic_lookup.R")
 source("metierannotation.R")
 
+convert_nation <- function(NMDnationCode){
+  if (NMDnationCode == 58){
+    return("NOR")
+  }
+}
+
+get_conversion_factor <- function(species, IMRproducttype){
+  #COD
+  if (species == 164712){
+    #guttet with head
+    if (IMRproducttype == 4){
+      return(1.18)
+    }
+  }
+  #HAD
+  if (species == 164744){
+    #guttet with head
+    if (IMRproducttype == 4){
+      return(1.14)
+    }
+  }
+  #PLE
+  if (species == 172902){
+    #guttet with head
+    if (IMRproducttype == 4){
+      return(1.1)
+    }
+  }
+  #MON
+  if (species == 164501){
+    #guttet with head
+    if (IMRproducttype == 4){
+      return(1.20)
+    }
+    if (IMRproducttype == 3){
+      return(2.8)
+    }
+  }
+  #LEM
+  if (species == 172888){
+    #guttet with head
+    if (IMRproducttype == 4){
+      return(1.10)
+    }
+    if (IMRproducttype == 3){
+      return(1.20)
+    }
+  }
+  #HAL
+  if (species == 172933){
+    #guttet with head
+    if (IMRproducttype == 4){
+      return(1.10)
+    }
+    if (IMRproducttype == 3){
+      return(1.35)
+    }
+  }
+  #Tusk
+  if (species == 164740){
+    #guttet with head
+    if (IMRproducttype == 4){
+      return(1.20)
+    }
+    if (IMRproducttype == 3){
+      return(1.40)
+    }
+  }
+  
+  stop(paste("Product type", IMRproducttype, "not supported for species", species))
+}
+
+# convert HP to kW
+convertPower <- function(powerLss){
+  if (is.na(powerLss)){
+    return(NA)
+  }
+  else{
+    return(powerLss/1.36)
+  }
+}
+
+getLengthCategory <- function(length){
+  if (is.na(length)){
+    return("UNKNOWN")
+  }
+  
+  if (length < 8){
+    return("<8")
+  }
+  if (length < 10){
+    return("8-<10")
+  }
+  if (length > 12){
+    return("10-<12")
+  }
+  if (length < 15){
+    return("12-<15")
+  }
+  if (length < 18){
+    return("15-<18")
+  }
+  if (length < 24){
+    return("18-<24")
+  }
+  if (length < 40){
+    return("24-<40")
+  }
+  if (length >= 40){
+    return("40<")
+  }
+  
+}
+
 #' Make anonymized code for vessel
 #' Version for test-data only.
 encodeVessel <- function(platformCode){
@@ -76,6 +190,12 @@ getPresentation <- function(NMDReferenceProducttype){
   if (NMDReferenceProducttype=="1"){
     return(codelist$RS_Presentation$whole)
   }
+  if (NMDReferenceProducttype=="4"){
+    return(codelist$RS_Presentation$guttedwHead)
+  }
+  if (NMDReferenceProducttype=="3"){
+    return(codelist$RS_Presentation$guttedwoHead)
+  }
   else{
     stop(paste("NMD product type not supported", NMDReferenceProducttype))
   }
@@ -121,14 +241,31 @@ exportSA <- function(stream, catchsamples, nmdbiotic, lower_hierarchy, catchfrac
   for (i in 1:nrow(catchsamples)){
     presentation <- getPresentation(catchsamples$sampleproducttype[i]) 
     if (presentation==codelist$RS_Presentation$whole){
-      conv_factor <- 1
+      conv_factor <- NA
+      sampW <- catchsamples$lengthsampleweight*1000
     }
     else{
-      stop("Conversion factors not implemented.")
-      #when implementing conversion, check if it should also be applied to total weights
+      conv_factor <- get_conversion_factor(catchsamples$catchcategory[i], catchsamples$sampleproducttype[i])
+      sampW <- catchsamples$lengthsampleweight*1000*conv_factor
     }
     
-    writeline(stream, c("SA", seqnr, NA, codelist$RS_Stratfification$unstratified,"U",catchsamples$aphia[i],NA,presentation,NA,catchfraction,NA,NA,NA,"U",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,codelist$RS_UnitType$basket, format(round(catchsamples$catchweight[i]*1000), scientific = F), format(round(conv_factor*catchsamples$lengthsampleweight*1000), scientific = F), format(round(conv_factor*catchsamples$lengthsampleweight/catchsamples$catchweight[i]), scientific = F), 1, NA,NA,codelist$RS_SelectionMethod$systematic, catchsamples$catchsampleid, lower_hierarchy, codelist$RS_Sampler$self,NA,NA,NA,NA,format(conv_factor)))
+    if (catchsamples$catchproducttype[i] == 1){
+      conv_factor_catch <- NA
+      totW <- catchsamples$catchweight[i]*1000
+    }
+    else if (catchsamples$catchproducttype[i] == 4){
+      conv_factor_catch <- get_conversion_factor(catchsamples$catchcategory[i], catchsamples$catchproducttype[i])
+      totW <- catchsamples$catchweight[i]*conv_factor_catch*1000
+    }
+    else if (catchsamples$catchproducttype[i] == 3){
+      conv_factor_catch <- get_conversion_factor(catchsamples$catchcategory[i], catchsamples$catchproducttype[i])
+      totW <- catchsamples$catchweight[i]*conv_factor_catch*1000
+    }
+    else{
+      stop(paste("product type", catchsamples$catchproducttype[i], "not supported"))
+    }
+    
+    writeline(stream, c("SA", seqnr, NA, codelist$RS_Stratfification$unstratified,"U",catchsamples$aphia[i],NA,presentation,NA,catchfraction,NA,NA,NA,"U",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,codelist$RS_UnitType$basket, format(round(totW), scientific = F), format(round(sampW), scientific = F), NA, NA, NA,NA,codelist$RS_SelectionMethod$systematic, catchsamples$catchsampleid, lower_hierarchy, codelist$RS_Sampler$self,NA,NA,NA,NA,conv_factor))
     individuals <- merge(nmdbiotic$ReadBioticXML_BioticData_individual.txt, catchsamples[i,])
     
     if (lower_hierarchy=="A"){
@@ -155,6 +292,10 @@ obs <- c(codelist$RS_BiologicalMeasurementType$length, codelist$RS_BiologicalMea
 exportBVunstratified <- function(stream, individuals, nmdbiotic, fishobservations=obs, agingstructure=NULL){
   
   individuals <- individuals[order(individuals$specimenid),]
+  
+  if (nrow(individuals)<1){
+    return()
+  }
   
   for (i in 1:nrow(individuals)){
     
@@ -501,9 +642,9 @@ exportPbFO <- function(stream, stations, nmdbiotic, lower_hierarchy, specieslist
     
     assemblage <- targetAssemblageFunction(nmdbiotic)
     writeline(stream, c("FO",
-                        codelist$RS_Stratfification$unstratified, 
+                        codelist$RS_Stratfification$stratified, 
                         seqnr, 
-                        "U", 
+                        getGear(stations$gear[i]), 
                         codelist$RS_Clustering$unclustered, 
                         "U",
                         codelist$RS_Sampler$observer,
@@ -601,8 +742,8 @@ exportHerringSS <- function(stream){
 exportPbSL2018 <- function(filename, samplingcountry=codelist$ISO_3166$norway, samplinginstitution=codelist$EDMO$IMR){
   stream <- file(filename, open="w")
   writeline(stream, c("SL", samplingcountry,samplinginstitution,"PortSamplingCodHadPok",2018,codelist$RS_CatchFraction$landed,codelist$SpecASFIS$cod,126436))
-  writeline(stream, c("SL", samplingcountry,samplinginstitution,"PortSamplingCodHadPok",2018,codelist$RS_CatchFraction$landed,codelist$SpecASFIS$had,126437))
-  writeline(stream, c("SL", samplingcountry,samplinginstitution,"PortSamplingCodHadPok",2018,codelist$RS_CatchFraction$landed,codelist$SpecASFIS$pok,126441))
+  writeline(stream, c("SL", samplingcountry,samplinginstitution,"PortSamplingCodHadPok",2018,codelist$RS_CatchFraction$landed,codelist$SpecASFIS$hadock,126437))
+  writeline(stream, c("SL", samplingcountry,samplinginstitution,"PortSamplingCodHadPok",2018,codelist$RS_CatchFraction$landed,codelist$SpecASFIS$saithe,126441))
   close(stream)
 }
 

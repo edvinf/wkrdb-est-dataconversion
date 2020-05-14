@@ -90,9 +90,19 @@ getGear <- function(NMDreferenceGearCode){
   if (NMDreferenceGearCode %in% c(3500)){
     return(codelist$GearType$pelagictrawl)
   }
+  if (NMDreferenceGearCode %in% c(3600)){
+    return(codelist$GearType$demershalseine)
+  }
   if (NMDreferenceGearCode %in% c(5110)){
     return(codelist$GearType$longline)
   }
+  if (NMDreferenceGearCode %in% c(5211)){
+    return(codelist$GearType$mechjig)
+  }
+  if (NMDreferenceGearCode %in% c(4127,4143)){
+    return(codelist$GearType$setnet)
+  }
+  
   else{
     stop(paste("NMD reference gear code ", NMDreferenceGearCode, "not supported."))
   }
@@ -108,8 +118,20 @@ getMeshSize <- function(NMDreferenceGearCode){
   if (NMDreferenceGearCode %in% c(3500)){
     return(NA)
   }
-  if (NMDreferenceGearCode %in% c(5110)){
+  if (NMDreferenceGearCode %in% c(3600)){
     return(NA)
+  }
+  if (substr(NMDreferenceGearCode,1,2) %in% c("51")){
+    return(NA)
+  }
+  if (substr(NMDreferenceGearCode,1,2) %in% c("52")){
+    return(NA)
+  }
+  if (NMDreferenceGearCode == 4127){
+    return(96)
+  }
+  if (NMDreferenceGearCode == 4143){
+    return(96)
   }
   else{
     stop(paste("NMD reference gear code ", NMDreferenceGearCode, "not supported."))
@@ -126,9 +148,19 @@ getSelDev <- function(NMDreferenceGearCode){
   if (NMDreferenceGearCode %in% c(3500)){
     return(NA) 
   }
-  if (NMDreferenceGearCode %in% c(5110)){
-    return(NA) 
+  if (NMDreferenceGearCode %in% c(3600)){
+    return(NA)
   }
+  if (substr(NMDreferenceGearCode,1,2) %in% c("51")){
+    return(NA)
+  }
+  if (substr(NMDreferenceGearCode,1,2) %in% c("52")){
+    return(NA)
+  }
+  if (substr(NMDreferenceGearCode,1,2) %in% c("41")){
+    return(NA)
+  }
+
   
   else{
     stop(paste("NMD reference gear code ", NMDreferenceGearCode, "not supported."))
@@ -145,7 +177,16 @@ getSelDevMeshSize <- function(NMDreferenceGearCode){
   if (NMDreferenceGearCode %in% c(3500)){
     return(NA)
   }
-  if (NMDreferenceGearCode %in% c(5110)){
+  if (NMDreferenceGearCode %in% c(3600)){
+    return(NA)
+  }
+  if (substr(NMDreferenceGearCode,1,2) %in% c("51")){
+    return(NA)
+  }
+  if (substr(NMDreferenceGearCode,1,2) %in% c("52")){
+    return(NA)
+  }
+  if (substr(NMDreferenceGearCode,1,2) %in% c("41")){
     return(NA)
   }
   else{

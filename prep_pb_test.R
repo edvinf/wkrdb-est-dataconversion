@@ -23,6 +23,8 @@ all(!is.na(pb2018q1$ReadBioticXML_BioticData_catchsample.txt$catchweight))
 # construct: 
 source("metierannotation.R")
 source("data_conversion.R")
+source("vesselList.R")
+exportVessels("vessellist.csv", pb2018q1$ReadBioticXML_BioticData_fishstation.txt$catchplatform)
 exportPbSL2018("specieslist_portsampling.csv")
-exportPortsamplingRDBES("portsampling_H6.csv", pb2018q1, exportPbSS, 2018, "port sampling No 64 Lat", "Fresh fish landings", generateTargetAssemblageSpecified("DEF"))
+exportPortsamplingRDBES("portsampling_H6.csv", pb2018q1, exportPbSS, 2018, "TESTFILE - port sampling No 64 Lat", "Fresh fish landings", generateTargetAssemblageSpecified("DEF"))
 
