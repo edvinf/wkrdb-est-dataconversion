@@ -76,6 +76,12 @@ getMetierLvl6 <- function(NMDreferenceGearCode, targetAssemblage){
   if (!is.na(gear) & !is.na(targetAssemblage) & !is.na(meshrange) & !is.na(seldev) & !is.na(seldevmesh)){
     return(paste(gear, targetAssemblage, meshrange, seldev, seldevmesh, sep="_"))  
   }
+  else if (!is.na(gear) & !is.na(targetAssemblage) & !is.na(seldev)){
+    return(paste(gear, targetAssemblage, "0", seldev, "0", sep="_"))  
+  }
+  else if (!is.na(gear) & !is.na(targetAssemblage)){
+    return(paste(gear, targetAssemblage, "0", "0", "0", sep="_"))  
+  }
   else{
     return(NA)
   }

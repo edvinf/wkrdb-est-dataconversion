@@ -265,7 +265,7 @@ exportSA <- function(stream, catchsamples, nmdbiotic, lower_hierarchy, catchfrac
       stop(paste("product type", catchsamples$catchproducttype[i], "not supported"))
     }
     
-    writeline(stream, c("SA", seqnr, NA, codelist$RS_Stratfification$unstratified,"U",catchsamples$aphia[i],NA,presentation,NA,catchfraction,NA,NA,NA,"U",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,codelist$RS_UnitType$basket, format(round(totW), scientific = F), format(round(sampW), scientific = F), NA, NA, NA,NA,codelist$RS_SelectionMethod$systematic, catchsamples$catchsampleid, lower_hierarchy, codelist$RS_Sampler$self,NA,NA,NA,NA,conv_factor))
+    writeline(stream, c("SA", seqnr, NA, codelist$RS_Stratfification$unstratified,"U",catchsamples$aphia[i],NA,presentation,codelist$RS_SpecimensState$Dead,catchfraction,NA,NA,NA,"U",NA,NA,NA,"NA",NA,NA,NA,NA,NA,NA,NA,NA,codelist$RS_UnitType$basket, format(round(totW), scientific = F), format(round(sampW), scientific = F), NA, NA, NA,NA,codelist$RS_SelectionMethod$systematic, catchsamples$catchsampleid, lower_hierarchy, codelist$RS_Sampler$self,codelist$YesNoFields$yes,NA,NA,NA,conv_factor))
     individuals <- merge(nmdbiotic$ReadBioticXML_BioticData_individual.txt, catchsamples[i,])
     
     if (lower_hierarchy=="A"){
@@ -324,7 +324,7 @@ exportBVunstratified <- function(stream, individuals, nmdbiotic, fishobservation
         }
       } else if (p==codelist$RS_BiologicalMeasurementType$sex){
         if (!is.na(individuals[i,"sex"])){
-          writeline(stream, c("BV", fishnumber, stratification, stratum, codelist$RS_BiologicalMeasurementType$sex, getSex(individuals[i,"sex"]), unitscalelist, NA, NA, nrow(individuals), sum(!is.na(individuals$sex)), NA, NA, codelist$RS_SelectionMethod$SRSWOR, fishnumber, sampler))
+          #writeline(stream, c("BV", fishnumber, stratification, stratum, codelist$RS_BiologicalMeasurementType$sex, getSex(individuals[i,"sex"]), unitscalelist, NA, NA, nrow(individuals), sum(!is.na(individuals$sex)), NA, NA, codelist$RS_SelectionMethod$SRSWOR, fishnumber, sampler))
         }
       }
       else{
@@ -414,7 +414,8 @@ exportLotteryFO <- function(stream, nmdbiotic, lower_hierarchy, selectionProb, s
                         getEcoZone(stations$latitudestart[i], stations$longitudestart[i]),
                         getDCRareaLvl3(stations$latitudestart[i], stations$longitudestart[i]),
                         NA,#getDCRareaLvl5(stations$latitudestart[i], stations$longitudestart[i]),
-                        fdirarea,
+                        "NA", #fdirarea,
+                        NA,
                         getFishingDepth(stations$fishingdepthmean[i],stations$fishingdepthmin[i], stations$fishingdepthmax[i], stations$fishingdepthstart[i], stations$fishingdepthstop[i]),
                         getBottomDepth(stations$bottomdepthmean[i], stations$bottomdepthstart[i], stations$bottomdepthstop[i]),
                         NA,
@@ -425,13 +426,13 @@ exportLotteryFO <- function(stream, nmdbiotic, lower_hierarchy, selectionProb, s
                         getSelDev(stations$gear[i]),
                         getSelDevMeshSize(stations$gear[i]),
                         assemblage,
-                        NA,
+                        "Unknow",
                         NA,
                         codelist$RS_ObservationCode$hauling,
                         NA, #fishing operations total, get from logbooks
-                        NA, #fishing operations sampled, get from biotic
-                        format(stations$selectionprobability[i]),
-                        format(stations$inclusionprobability[i]),
+                        nrow(stations), #fishing operations sampled, get from biotic
+                        NA, #format(stations$selectionprobability[i]),
+                        NA, #format(stations$inclusionprobability[i]),
                         codelist$RS_SelectionMethod$UPSWOR,
                         stations$serialnumber[i],
                         NA,
@@ -439,13 +440,14 @@ exportLotteryFO <- function(stream, nmdbiotic, lower_hierarchy, selectionProb, s
                         NA,
                         NA,
                         NA,
+                        codelist$YesNoFields$yes,
                         NA
     ))
     specieslistfunction(stream)
     
     catchsamples <- merge(nmdbiotic$ReadBioticXML_BioticData_catchsample.txt, stations[i,])
     
-    exportSA(stream, catchsamples, nmdbiotic, lower_hierarchy, codelist$RS_CatchFraction$landed, seqnr = 1)
+    exportSA(stream, catchsamples, nmdbiotic, lower_hierarchy, codelist$RS_CatchFraction$landed, seqnr = seqnr)
   }
   
 }
@@ -694,7 +696,7 @@ exportPbFO <- function(stream, stations, nmdbiotic, lower_hierarchy, specieslist
     
     catchsamples$sampleproducttype[is.na(catchsamples$sampleproducttype)] <- 1 #assume product type 1 if not provided
     
-    exportSA(stream, catchsamples, nmdbiotic, lower_hierarchy, codelist$RS_CatchFraction$landed, seqnr = 1)
+    exportSA(stream, catchsamples, nmdbiotic, lower_hierarchy, codelist$RS_CatchFraction$landed, seqnr = seqnr)
   }
   
 }
@@ -728,7 +730,7 @@ exportPortsamplingRDBES <- function(outfile, nmdbiotic, speciesselection, year, 
 # exports species list herring lottery
 exportHerringSL2018 <- function(filename, samplingcountry=codelist$ISO_3166$norway, samplinginstitution=codelist$EDMO$IMR){
   stream <- file(filename, open="w")
-  writeline(stream, c("SL", samplingcountry,samplinginstitution,"Herring",2018,codelist$RS_CatchFraction$landed,codelist$SpecASFIS$herring,126417))
+  writeline(stream, c("SL", samplingcountry,samplinginstitution,"Herring",2018,codelist$RS_CatchFraction$landed,126417,126417))
   close(stream)
 }
 
@@ -739,9 +741,9 @@ exportHerringSS <- function(stream){
 # exports species list pb
 exportPbSL2018 <- function(filename, samplingcountry=codelist$ISO_3166$norway, samplinginstitution=codelist$EDMO$IMR){
   stream <- file(filename, open="w")
-  writeline(stream, c("SL", samplingcountry,samplinginstitution,"PortSamplingCodHadPok",2018,codelist$RS_CatchFraction$landed,codelist$SpecASFIS$cod,126436))
-  writeline(stream, c("SL", samplingcountry,samplinginstitution,"PortSamplingCodHadPok",2018,codelist$RS_CatchFraction$landed,codelist$SpecASFIS$hadock,126437))
-  writeline(stream, c("SL", samplingcountry,samplinginstitution,"PortSamplingCodHadPok",2018,codelist$RS_CatchFraction$landed,codelist$SpecASFIS$saithe,126441))
+  writeline(stream, c("SL", samplingcountry,samplinginstitution,"PortSamplingCodHadPok",2018,codelist$RS_CatchFraction$landed,126436,126436))
+  writeline(stream, c("SL", samplingcountry,samplinginstitution,"PortSamplingCodHadPok",2018,codelist$RS_CatchFraction$landed,126437,126437))
+  writeline(stream, c("SL", samplingcountry,samplinginstitution,"PortSamplingCodHadPok",2018,codelist$RS_CatchFraction$landed,126441,126441))
   close(stream)
 }
 
