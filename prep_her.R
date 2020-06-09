@@ -82,7 +82,7 @@ her2018$ReadBioticXML_BioticData_fishstation.txt$station <- 1:nrow(her2018$ReadB
 source("metierannotation.R")
 source("data_conversion.R")
 exportHerringSL2018("specieslistHerring_HSL.csv")
-exportLotteryRDBES("herringlottery_H13.csv", her2018, herringSelectionProb2018, exportHerringSS, 2018, "National Routine", "Norwegian fleet > 15 m", generateTargetAssemblageSpecified("SPF"))
+exportLotteryRDBES("herringlottery_H13.csv", her2018, herringSelectionProb2018, exportHerringSS, 2018, "National Routine", "Norwegian HER > 15 m", generateTargetAssemblageSpecified("SPF"))
 stop("Sampling probabilites set to NA (RDBES error ?")
 stop("All individuals set to Live weight (fix)")
 stop("Skipping sex")
