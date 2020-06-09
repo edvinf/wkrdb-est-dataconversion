@@ -51,9 +51,9 @@ codelist$RS_UnitOfValue$mm <- "mm"
 codelist$RS_UnitOfValue$g <- "g"
 codelist$RS_BiologicalMeasurementType <- list()
 codelist$RS_BiologicalMeasurementType$age <- "Age"
-codelist$RS_BiologicalMeasurementType$length <- "Length"
+codelist$RS_BiologicalMeasurementType$length <- "TotalLength"
 codelist$RS_BiologicalMeasurementType$sex <- "Sex"
-codelist$RS_BiologicalMeasurementType$weight <- "Weight"
+codelist$RS_BiologicalMeasurementType$weight <- "WeightLive"
 codelist$RS_MethodForMeasurement <- list()
 codelist$RS_MethodForMeasurement$otolith <- "Otolith"
 codelist$RS_MethodForMeasurement$scale <- "Scale"
@@ -76,9 +76,11 @@ codelist$RS_Clustering$unclustered <- "No"
 codelist$EDMO <- list()
 codelist$EDMO$IMR <- "1351"
 codelist$RS_samplingSchemeType <- list()
-codelist$RS_samplingSchemeType$nationalPilot <- "National Pilot"
+codelist$RS_samplingSchemeType$nationalPilot <- "NatPil"
 codelist$RS_samplingSchemeType$nationalMonitoring <- "National Routine"
 codelist$RS_Samplingtype <- list()
 codelist$RS_Samplingtype$onshore <- "On-shore"
 codelist$RS_locationtype <- list()
 codelist$RS_locationtype$port <- "Port"
+codelist$RS_SpecimensState <- list()
+codelist$RS_SpecimensState$Dead <- "Dead"
