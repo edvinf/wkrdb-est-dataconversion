@@ -305,7 +305,7 @@ exportBVunstratified <- function(stream, individuals, nmdbiotic, fishobservation
     
     fishnumber <- individuals$specimenid[i]
     sampler <- codelist$RS_Sampler$observer
-    stratification <- 909 #codelist$RS_Stratfification$unstratified
+    stratification <- codelist$YesNoFields$no
     unitscalelist <- "A"
     stratum <- "U"
     
@@ -735,7 +735,7 @@ exportHerringSL2018 <- function(filename, samplingcountry=codelist$ISO_3166$norw
 }
 
 exportHerringSS <- function(stream){
-  writeline(stream, c("SS", 1, codelist$RS_Stratfification$unstratified, codelist$RS_ObservationActivityCode$haul,codelist$RS_CatchRegistration$landed,codelist$RS_ObservationType$volume,"U",codelist$RS_Clustering$unclustered,"U",codelist$RS_Sampler$self,"Herring",codelist$YesNoFields$yes,1,1,1.0,1.0,codelist$RS_SelectionMethod$CENSUS,"Herring",NA,NA,NA,NA,NA,NA))
+  writeline(stream, c("SS", 1, codelist$RS_Stratfification$unstratified, codelist$RS_ObservationActivityCode$haul,codelist$RS_CatchRegistration$landed,codelist$RS_ObservationType$volume,"U",codelist$RS_Clustering$unclustered,"U",codelist$RS_Sampler$self,"Herring",codelist$YesNoFields$yes,1,1,1.0,1.0,codelist$RS_SelectionMethod$CENSUS,"Herring",NA,NA,NA,NA,NA,codelist$YesNoFields$yes,NA))
 }
 
 # exports species list pb

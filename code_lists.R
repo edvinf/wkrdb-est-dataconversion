@@ -76,7 +76,7 @@ codelist$RS_Clustering$unclustered <- "No"
 codelist$EDMO <- list()
 codelist$EDMO$IMR <- "1351"
 codelist$RS_samplingSchemeType <- list()
-codelist$RS_samplingSchemeType$nationalPilot <- "NatPil"
+codelist$RS_samplingSchemeType$nationalPilot <- "NatpilCF"
 codelist$RS_samplingSchemeType$nationalMonitoring <- "National Routine"
 codelist$RS_Samplingtype <- list()
 codelist$RS_Samplingtype$onshore <- "On-shore"
