@@ -33,7 +33,7 @@ getMetierLvl6 <- function(NMDreferenceGearCode, targetAssemblage){
   meshrange <- NA
   meshsize <- getMeshSize(NMDreferenceGearCode)
   if (!is.na(meshsize)){
-    if (gear==codelist$GearType$purseseine){
+    if (gear==RDBESexchange:::codelist$GearType$purseseine){
        if (targetAssemblage=="SPF"){
          stop(paste("Mesh size range not supported for gear and assemblage:", gear, targetAssemblage))
        }
@@ -41,7 +41,7 @@ getMetierLvl6 <- function(NMDreferenceGearCode, targetAssemblage){
         stop(paste("Mesh size range not supported for gear and assemblage:", gear, targetAssemblage))
       }
     }
-    if (gear==codelist$GearType$pelagictrawl){
+    if (gear==RDBESexchange:::codelist$GearType$pelagictrawl){
       if (targetAssemblage=="SPF"){
         stop(paste("Mesh size range not supported for gear and assemblage:", gear, targetAssemblage))
       }
@@ -55,7 +55,7 @@ getMetierLvl6 <- function(NMDreferenceGearCode, targetAssemblage){
   
   seldevmesh <- NA
   if (!is.na(seldevmesh)){
-    if (gear==codelist$GearType$purseseine){
+    if (gear==RDBESexchange:::codelist$GearType$purseseine){
       if (targetAssemblage=="SPF"){
         stop(paste("Selectivity device mesh size range not supported for gear and assemblage:", gear, targetAssemblage))
       }
@@ -63,7 +63,7 @@ getMetierLvl6 <- function(NMDreferenceGearCode, targetAssemblage){
         stop(paste("Selectivity device mesh size range not supported for gear and assemblage:", gear, targetAssemblage))
       }
     }
-    if (gear==codelist$GearType$pelagictrawl){
+    if (gear==RDBESexchange:::codelist$GearType$pelagictrawl){
       if (targetAssemblage=="SPF"){
         stop(paste("Selectivity device mesh size range not supported for gear and assemblage:", gear, targetAssemblage))
       }
@@ -91,22 +91,22 @@ getMetierLvl6 <- function(NMDreferenceGearCode, targetAssemblage){
 #' @param NMDreferenceGearCode gear codes defined in NMD reference (NMD biotic)
 getGear <- function(NMDreferenceGearCode){
   if (NMDreferenceGearCode %in% c(3712,3710)){
-    return(codelist$GearType$purseseine)
+    return(RDBESexchange:::codelist$GearType$purseseine)
   }
   if (NMDreferenceGearCode %in% c(3500)){
-    return(codelist$GearType$pelagictrawl)
+    return(RDBESexchange:::codelist$GearType$pelagictrawl)
   }
   if (NMDreferenceGearCode %in% c(3600)){
-    return(codelist$GearType$demershalseine)
+    return(RDBESexchange:::codelist$GearType$demershalseine)
   }
   if (NMDreferenceGearCode %in% c(5110)){
-    return(codelist$GearType$longline)
+    return(RDBESexchange:::codelist$GearType$longline)
   }
   if (NMDreferenceGearCode %in% c(5211)){
-    return(codelist$GearType$mechjig)
+    return(RDBESexchange:::codelist$GearType$mechjig)
   }
   if (NMDreferenceGearCode %in% c(4127,4143)){
-    return(codelist$GearType$setnet)
+    return(RDBESexchange:::codelist$GearType$setnet)
   }
   
   else{

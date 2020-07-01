@@ -2,8 +2,6 @@
 # Generic export functions
 #
 library(RDBESexchange)
-source("code_lists.R")
-source("geographic_lookup.R")
 source("metierannotation.R")
 
 convert_nation <- function(NMDnationCode){
