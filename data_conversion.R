@@ -405,8 +405,8 @@ exportLotteryFO <- function(stream, nmdbiotic, lower_hierarchy, selectionProb, s
                            FOunitName = stations$serialnumber[i],
                            FOnumTotal = NA,  #fishing operations total, get from logbooks
                            FOnumSamp = nrow(stations), #fishing operations sampled, get from biotic
-                           FOselProb = NA, #format(stations$selectionprobability[i]),
-                           FOincProb = NA, #format(stations$inclusionprobability[i]),
+                           FOselProb = stations$selectionprobability[i],
+                           FOincProb = stations$inclusionprobability[i],
                            FOselectMeth = RDBESexchange:::codelist$RS_SelectionMethod$UPSWOR, 
                            FOsampler = RDBESexchange:::codelist$RS_Sampler$self,
                            FOcatReg = RDBESexchange:::codelist$RS_CatchRegistration$landed, 
