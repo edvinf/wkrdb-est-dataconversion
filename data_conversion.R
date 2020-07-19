@@ -414,7 +414,7 @@ exportLotteryFO <- function(stream, nmdbiotic, lower_hierarchy, selectionProb, s
                            FOmetier5 = getMetierLvl5(stations$gear[i], assemblage),
                            FOmetier6 = getMetierLvl6(stations$gear[i], assemblage),
                            FOgear = getGear(stations$gear[i]), 
-                           FOincBycMitigDev = "Unknow",
+                           FOincBycMitigDev = "Unknown",
                            FOstopLat = stoplat,
                            FOstopLon = stoplon,
                            FOendDate = stations$stationstartdate[i],#mandatory, provide start date for now.
