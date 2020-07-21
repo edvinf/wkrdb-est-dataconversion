@@ -721,7 +721,12 @@ exportHerringSL2018 <- function(filename, samplingcountry=RDBESexchange:::codeli
 }
 
 exportHerringSS <- function(stream){
-  writeline(stream, c("SS", 1, RDBESexchange:::codelist$RS_Stratfification$unstratified, RDBESexchange:::codelist$RS_ObservationActivityCode$haul,RDBESexchange:::codelist$RS_CatchRegistration$landed,RDBESexchange:::codelist$RS_ObservationType$volume,"U",RDBESexchange:::codelist$RS_Clustering$unclustered,"U",RDBESexchange:::codelist$RS_Sampler$self,"Herring",RDBESexchange:::codelist$YesNoFields$yes,1,1,1.0,1.0,RDBESexchange:::codelist$RS_SelectionMethod$CENSUS,"Herring",NA,NA,NA,NA,NA,RDBESexchange:::codelist$YesNoFields$yes,NA))
+  RDBESexchange::writeSS(stream, SSseqNum=1, 
+          SSobsActTyp=RDBESexchange:::codelist$RS_ObservationActivityCode$haul,
+          SScatchFra=RDBESexchange:::codelist$RS_CatchRegistration$landed,
+          SSobsTyp=RDBESexchange:::codelist$RS_ObservationType$volume,
+          SSsampler=RDBESexchange:::codelist$RS_Sampler$self,
+          SSspecListName="Herring")
 }
 
 # exports species list pb
