@@ -716,7 +716,14 @@ exportPortsamplingRDBES <- function(outfile, nmdbiotic, speciesselection, year, 
 # exports species list herring lottery
 exportHerringSL2018 <- function(filename, samplingcountry=RDBESexchange:::codelist$ISO_3166$norway, samplinginstitution=RDBESexchange:::codelist$EDMO$IMR){
   stream <- file(filename, open="w")
-  writeline(stream, c("SL", samplingcountry,samplinginstitution,"Herring",2018,RDBESexchange:::codelist$RS_CatchFraction$landed,126417,126417))
+  RDBESexchange::writeSL(stream,
+          SLcountry = samplingcountry,
+          SLinstitute = samplinginstitution,
+          SLspeciesListName = "Herring",
+          SLyear = 2018,
+          SLcatchFraction = RDBESexchange:::codelist$RS_CatchFraction$landed,
+          SLcommercialTaxon = 126417,
+          SLspeciesCode = 126417)
   close(stream)
 }
 
