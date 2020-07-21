@@ -263,7 +263,19 @@ exportSA <- function(stream, catchsamples, nmdbiotic, lower_hierarchy, catchfrac
       stop(paste("product type", catchsamples$catchproducttype[i], "not supported"))
     }
     
-    writeline(stream, c("SA", seqnr, NA, RDBESexchange:::codelist$RS_Stratfification$unstratified,"U",catchsamples$aphia[i],NA,presentation,RDBESexchange:::codelist$RS_SpecimensState$Dead,catchfraction,NA,NA,NA,"U",NA,NA,NA,"NotApplicable",NA,NA,NA,NA,NA,NA,NA,NA,RDBESexchange:::codelist$RS_UnitType$basket, format(round(totW), scientific = F), format(round(sampW), scientific = F), NA, NA, NA,NA,RDBESexchange:::codelist$RS_SelectionMethod$systematic, catchsamples$catchsampleid, lower_hierarchy, RDBESexchange:::codelist$RS_Sampler$self,RDBESexchange:::codelist$YesNoFields$yes,NA,NA,NA,conv_factor))
+    RDBESexchange::writeSA(stream,
+                           SAseqNum=seqnr,
+                           SAunitName=catchsamples$catchsampleid,
+                           SAspeCode=catchsamples$aphia[i],
+                           SApres=presentation,
+                           SAspecState=RDBESexchange:::codelist$RS_SpecimensState$Dead,
+                           SAcatchCat=catchfraction,
+                           SAtotalWtLive=round(totW),
+                           SAsampWtLive=round(sampW),
+                           SAselectMeth=RDBESexchange:::codelist$RS_SelectionMethod$systematic,
+                           SAlowHierarchy=lower_hierarchy,
+                           SAsampler=RDBESexchange:::codelist$RS_Sampler$self,
+                           SAconFacMesLive=conv_factor)
     individuals <- merge(nmdbiotic$ReadBioticXML_BioticData_individual.txt, catchsamples[i,])
     
     if (lower_hierarchy=="A"){
