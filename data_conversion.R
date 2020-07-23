@@ -322,15 +322,40 @@ exportBVunstratified <- function(stream, individuals, nmdbiotic, fishobservation
     for (p in fishobservations){
       if (p==RDBESexchange:::codelist$RS_BiologicalMeasurementType$age){
         if (!is.na(individuals[i,"age"])){
-          writeline(stream, c("BV", fishnumber, stratification, stratum, RDBESexchange:::codelist$RS_BiologicalMeasurementType$age, individuals[i,"age"], "Year", getRDBESagingMethod(agingstructure), NA, nrow(individuals), sum(!is.na(individuals$age)), NA, NA, RDBESexchange:::codelist$RS_SelectionMethod$SRSWOR, fishnumber, sampler))
+          RDBESexchange::writeBV(stream,
+                                 BVfishId = fishnumber,
+                                 BVunitName = fishnumber,
+                                 BVtype = RDBESexchange:::codelist$RS_BiologicalMeasurementType$age,
+                                 BVvalue = individuals[i,"age"],
+                                 BVvalTyp = "Year",
+                                 BVmethod = getRDBESagingMethod(agingstructure),
+                                 BVnumTotal = nrow(individuals),
+                                 BVnumSamp = sum(!is.na(individuals$age)),
+                                 BVsampler = sampler)
         }
       } else if (p==RDBESexchange:::codelist$RS_BiologicalMeasurementType$length){
         if (!is.na(individuals[i,"length"])){
-          writeline(stream, c("BV", fishnumber, stratification, stratum, RDBESexchange:::codelist$RS_BiologicalMeasurementType$length, individuals[i,"length"]*1000, RDBESexchange:::codelist$RS_UnitOfValue$mm, NA, NA, nrow(individuals), sum(!is.na(individuals$length)), NA, NA, RDBESexchange:::codelist$RS_SelectionMethod$SRSWOR, fishnumber, sampler))  
+          RDBESexchange::writeBV(stream,
+                                 BVfishId = fishnumber,
+                                 BVunitName = fishnumber,
+                                 BVtype = RDBESexchange:::codelist$RS_BiologicalMeasurementType$length,
+                                 BVvalue = individuals[i,"length"]*1000,
+                                 BVvalTyp = RDBESexchange:::codelist$RS_UnitOfValue$mm,
+                                 BVnumTotal = nrow(individuals),
+                                 BVnumSamp = sum(!is.na(individuals$length)),
+                                 BVsampler = sampler)
         }
       } else if (p==RDBESexchange:::codelist$RS_BiologicalMeasurementType$weight){
         if (!is.na(individuals[i,"individualweight"])){
-          writeline(stream, c("BV", fishnumber, stratification, stratum, RDBESexchange:::codelist$RS_BiologicalMeasurementType$weight, individuals[i,"individualweight"]*1000, RDBESexchange:::codelist$RS_UnitOfValue$g, NA, NA, nrow(individuals), sum(!is.na(individuals$individualweight)), NA, NA, RDBESexchange:::codelist$RS_SelectionMethod$SRSWOR, fishnumber, sampler))          
+          RDBESexchange::writeBV(stream,
+                                 BVfishId = fishnumber,
+                                 BVunitName = fishnumber,
+                                 BVtype = RDBESexchange:::codelist$RS_BiologicalMeasurementType$weight,
+                                 BVvalue = individuals[i,"individualweight"]*1000,
+                                 BVvalTyp = RDBESexchange:::codelist$RS_UnitOfValue$g,
+                                 BVnumTotal = nrow(individuals),
+                                 BVnumSamp = sum(!is.na(individuals$length)),
+                                 BVsampler = sampler)
         }
       } else if (p==RDBESexchange:::codelist$RS_BiologicalMeasurementType$sex){
         if (!is.na(individuals[i,"sex"])){
