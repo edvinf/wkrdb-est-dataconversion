@@ -96,6 +96,9 @@ getGear <- function(NMDreferenceGearCode){
   if (NMDreferenceGearCode %in% c(3500)){
     return(RDBESexchange:::codelist$GearType$pelagictrawl)
   }
+  if (NMDreferenceGearCode %in% c(3530)){
+    return(RDBESexchange:::codelist$GearType$pelagictrawl)
+  }
   if (NMDreferenceGearCode %in% c(3600)){
     return(RDBESexchange:::codelist$GearType$demershalseine)
   }
@@ -122,6 +125,9 @@ getMeshSize <- function(NMDreferenceGearCode){
     return(NA)
   }
   if (NMDreferenceGearCode %in% c(3500)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(3530)){
     return(NA)
   }
   if (NMDreferenceGearCode %in% c(3600)){
@@ -154,6 +160,9 @@ getSelDev <- function(NMDreferenceGearCode){
   if (NMDreferenceGearCode %in% c(3500)){
     return(NA) 
   }
+  if (NMDreferenceGearCode %in% c(3530)){
+    return(NA) 
+  }
   if (NMDreferenceGearCode %in% c(3600)){
     return(NA)
   }
@@ -181,6 +190,9 @@ getSelDevMeshSize <- function(NMDreferenceGearCode){
     return(0) 
   }
   if (NMDreferenceGearCode %in% c(3500)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(3530)){
     return(NA)
   }
   if (NMDreferenceGearCode %in% c(3600)){
