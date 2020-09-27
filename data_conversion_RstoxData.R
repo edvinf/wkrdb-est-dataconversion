@@ -241,11 +241,11 @@ exportSA <- function(stream, catchsamples, lower_hierarchy, catchfraction, seqnr
     presentation <- getPresentation(catches$sampleproducttype[i]) 
     if (presentation==RDBESexchange:::codelist$RS_Presentation$whole){
       conv_factor <- NA
-      sampW <- catches$lengthsampleweight*1000
+      sampW <- catches$lengthsampleweight[i]*1000
     }
     else{
       conv_factor <- get_conversion_factor(catches$catchcategory[i], catches$sampleproducttype[i])
-      sampW <- catches$lengthsampleweight*1000*conv_factor
+      sampW <- catches$lengthsampleweight[i]*1000*conv_factor
     }
     
     if (catches$catchproducttype[i] == 1){
@@ -266,7 +266,7 @@ exportSA <- function(stream, catchsamples, lower_hierarchy, catchfraction, seqnr
     
     RDBESexchange::writeSA(stream,
                            SAseqNum=seqnr,
-                           SAunitName=catchsamples$catchsampleid,
+                           SAunitName=catchsamples$catchsampleid[i],
                            SAspeCode=catchsamples$aphia[i],
                            SApres=presentation,
                            SAspecState=RDBESexchange:::codelist$RS_SpecimensState$Dead,
@@ -292,6 +292,80 @@ exportSA <- function(stream, catchsamples, lower_hierarchy, catchfraction, seqnr
       stop("Not yet supported")
     }
   }
+}
+
+exportStratifiedSA <- function(stream, catchsamples, lower_hierarchy, catchfraction, lastseqnr){
+  
+  catches <- catchsamples[!duplicated(catchsamples$catchsampleid)]
+  
+  
+  if (nrow(catches)>1){
+    stratified <- RDBESexchange:::codelist$YesNoFields$yes
+    stratanames <- paste(catchsamples$serialnumber, catchsamples$catchsampleid, sep="-")
+  }
+  else{
+    stratified <- RDBESexchange:::codelist$YesNoFields$no
+    stratanames <- "U"
+  }
+  
+  for (i in 1:nrow(catches)){
+    presentation <- getPresentation(catches$sampleproducttype[i]) 
+    if (presentation==RDBESexchange:::codelist$RS_Presentation$whole){
+      conv_factor <- NA
+      sampW <- catches$lengthsampleweight[i]*1000
+    }
+    else{
+      conv_factor <- get_conversion_factor(catches$catchcategory[i], catches$sampleproducttype[i])
+      sampW <- catches$lengthsampleweight[i]*1000*conv_factor
+    }
+    
+    if (catches$catchproducttype[i] == 1){
+      conv_factor_catch <- NA
+      totW <- catches$catchweight[i]*1000
+    }
+    else if (catches$catchproducttype[i] == 4){
+      conv_factor_catch <- get_conversion_factor(catches$catchcategory[i], catches$catchproducttype[i])
+      totW <- catches$catchweight[i]*conv_factor_catch*1000
+    }
+    else if (catches$catchproducttype[i] == 3){
+      conv_factor_catch <- get_conversion_factor(catches$catchcategory[i], catches$catchproducttype[i])
+      totW <- catches$catchweight[i]*conv_factor_catch*1000
+    }
+    else{
+      stop(paste("product type", catches$catchproducttype[i], "not supported"))
+    }
+    
+    RDBESexchange::writeSA(stream,
+                           SAseqNum=lastseqnr +1,
+                           SAstratification = stratified,
+                           SAstratumName = stratanames[i],
+                           SAunitName=catchsamples$catchsampleid[i],
+                           SAspeCode=catchsamples$aphia[i],
+                           SApres=presentation,
+                           SAspecState=RDBESexchange:::codelist$RS_SpecimensState$Dead,
+                           SAcatchCat=catchfraction,
+                           SAtotalWtLive=round(totW),
+                           SAsampWtLive=round(sampW),
+                           SAselectMeth=RDBESexchange:::codelist$RS_SelectionMethod$systematic,
+                           SAlowHierarchy=lower_hierarchy,
+                           SAsampler=RDBESexchange:::codelist$RS_Sampler$self,
+                           SAconFacMesLive=conv_factor)
+    individuals <- catchsamples[catchsamples$catchsampleid == catches$catchsampleid[i]]
+    lastseqnr <- lastseqnr +1
+    if (lower_hierarchy=="A"){
+      stop("Not yet supported")
+    }
+    if (lower_hierarchy=="B"){
+      stop("Not yet supported")
+    }
+    if (lower_hierarchy=="C"){
+      exportBVunstratified(stream, individuals, agingstructure = catchsamples$agingstructure[i])
+    }
+    if (lower_hierarchy=="D"){
+      stop("Not yet supported")
+    }
+  }
+  return(lastseqnr)
 }
 
 obs <- c(RDBESexchange:::codelist$RS_BiologicalMeasurementType$length, RDBESexchange:::codelist$RS_BiologicalMeasurementType$age, RDBESexchange:::codelist$RS_BiologicalMeasurementType$weight, RDBESexchange:::codelist$RS_BiologicalMeasurementType$sex)
@@ -369,6 +443,30 @@ exportBVunstratified <- function(stream, individuals, fishobservations=obs, agin
 
 
 
+exportPelSamDE <- function(stream, samplingschemename, samplingframedesc, year){
+  RDBESexhange::writeDE(stream, 
+                        DEsampScheme = samplingschemename,
+                        DEsampSchemeType = RDBESexchange:::codelist$RS_samplingSchemeType$nationalPilot,
+                        DEyear = year,
+                        DEstratumName = samplingframedesc,
+                        DEhierarchyCor = RDBESexchange:::codelist$YesNoFields$no, 
+                        DEhierarchy = RDBESexchange:::codelist$RS_UpperHierarchy$h13
+  )
+}
+
+exportLotterySD <- function(stream, samplingcountry=RDBESexchange:::codelist$ISO_3166$norway, samplinginstitution=RDBESexchange:::codelist$EDMO$IMR){
+  RDBESexhange::writeSD(stream,
+                        SDctry = RDBESexchange:::codelist$ISO_3166$norway,
+                        SDinst = RDBESexchange:::codelist$EDMO$IMR
+  )
+}
+
+exportPelSamSD <- function(stream, samplingcountry=RDBESexchange:::codelist$ISO_3166$norway, samplinginstitution=RDBESexchange:::codelist$EDMO$IMR){
+  RDBESexhange::writeSD(stream,
+                        SDctry = RDBESexchange:::codelist$ISO_3166$norway,
+                        SDinst = RDBESexchange:::codelist$EDMO$IMR
+  )
+}
 
 #
 # Lottery-sampling specific functions
@@ -471,7 +569,7 @@ exportLotteryFO <- function(stream, flatnmdbiotic, lower_hierarchy, samplingProb
       RDBESexchange::writeFO(stream,
                              FOseqNum = seqnr,
                              FOunitName = stations$unitname[i],
-                             FOnumTotal = NA,  #fishing operations total, get from logbooks
+                             FOnumTotal = stations$popTotal[i],  #fishing operations total, get from logbooks
                              FOnumSamp = length(unique(stations$serialnumber)), #fishing operations sampled, get from biotic
                              FOselProb = NA,
                              FOincProb = stations$i.prob[i],
@@ -494,7 +592,7 @@ exportLotteryFO <- function(stream, flatnmdbiotic, lower_hierarchy, samplingProb
                              FOmeshSize = getMeshSize(stations$gear[i]),
                              FOselDev = getSelDev(stations$gear[i]),
                              FOselDevMeshSize = getSelDevMeshSize(stations$gear[i]),
-                             FOtarget = stations$assemblage
+                             FOtarget = stations$assemblage[i]
       )
       
       exportLotterySS(stream, specieslistname)
@@ -506,6 +604,76 @@ exportLotteryFO <- function(stream, flatnmdbiotic, lower_hierarchy, samplingProb
   
 }
 
+
+exportPelSamFO <- function(stream, flatnmdbiotic, lower_hierarchy, specieslistname){
+  
+  
+  stations <- flatnmdbiotic[!duplicated(flatnmdbiotic$serialnumber),]
+  
+  seqnr <- 0
+  saseqnr <- 0
+  for (i in 1:nrow(stations)){
+    seqnr <- seqnr + 1
+    
+
+      fdirarea <- NA
+      #Didn1t validate leave out for now
+      #Get area and location code defined by Norwegian Directorate of fisheries
+      #if (!is.na(stations$system[i]) & stations$system[i]=="2"){
+      #  fdirarea <- formatFdirArea(stations$area[i], stations$location[i])      
+      #}
+      #if (is.na(fdirarea)){
+      #  area <- getFDIRarea(stations$latitudestart[i], stations$longitudestart[i])
+      #  location <- getFDIRlocation(stations$latitudestart[i], stations$longitudestart[i])
+      #  fdirarea <- formatFdirArea(area, location)      
+      #}
+      
+      stoplon <- stations$longitudeend[i]
+      if (!is.na(stoplon)){
+        stoplon <- stoplon
+      }
+      stoplat <-stations$latitudeend[i]
+      if (!is.na(stoplat)){
+        stoplat <- stoplat
+      }
+      
+      RDBESexchange::writeFO(stream,
+                             FOseqNum = seqnr,
+                             FOunitName = stations$serialnumber[i],
+                             FOnumTotal = NA,  #fishing operations total, get from logbooks
+                             FOnumSamp = length(unique(stations$serialnumber)), #fishing operations sampled, get from biotic
+                             FOselProb = NA,
+                             FOincProb = NA,
+                             FOselectMeth = RDBESexchange:::codelist$RS_SelectionMethod$NPAH, 
+                             FOsampler = RDBESexchange:::codelist$RS_Sampler$self,
+                             FOcatReg = RDBESexchange:::codelist$RS_CatchRegistration$landed, 
+                             FOobsCo = RDBESexchange:::codelist$RS_ObservationCode$hauling, 
+                             FOmetier5 = stations$metier5[i],
+                             FOmetier6 = stations$metier6[i],
+                             FOgear = stations$FAOgear[i], 
+                             FOincBycMitigDev = "Unknown",
+                             FOstopLat = stoplat,
+                             FOstopLon = stoplon,
+                             FOendDate = substring(stations$stationstartdate[i], 1, 10),#mandatory, provide start date for now.
+                             FOstartDate = substring(stations$stationstartdate[i], 1, 10),
+                             FOstartLat = stations$latitudestart[i], 
+                             FOstartLon = stations$longitudestart[i], 
+                             FOdep = getFishingDepth(stations$fishingdepthmean[i],stations$fishingdepthmin[i], stations$fishingdepthmax[i], stations$fishingdepthstart[i], stations$fishingdepthstop[i]),
+                             FOwaterDep = getBottomDepth(stations$bottomdepthmean[i], stations$bottomdepthstart[i], stations$bottomdepthstop[i]),
+                             FOmeshSize = getMeshSize(stations$gear[i]),
+                             FOselDev = getSelDev(stations$gear[i]),
+                             FOselDevMeshSize = getSelDevMeshSize(stations$gear[i]),
+                             FOtarget = stations$assemblage[i],
+                             FOaggLev = RDBESexchange:::codelist$RS_AggregationLevel$trip
+      )
+      
+      exportLotterySS(stream, specieslistname)
+      
+      saseqnr <- exportStratifiedSA(stream, flatnmdbiotic[flatnmdbiotic$serialnumber == stations$serialnumber[i],], lower_hierarchy, RDBESexchange:::codelist$RS_CatchFraction$landed, lastseqnr = saseqnr)
+    }  
+  
+  
+}
 
 
 exportLotterySS <- function(stream, specieslistname){
@@ -537,7 +705,11 @@ exportMonoTargetListLanded <- function(filename, listname, year, speciesCode, co
 }
 
 exportPelSam <- function(filename, data, year, schemename, framedesc, speciesListName){
-  warning("exportPelSam not implemented")
+  stream <- file(filename, open="w")
+  exportPelSamDE(stream, schemename, framedesc, year)
+  exportPelSamSD(stream)
+  exportPelSamFO(stream, data, RDBESexchange:::codelist$RS_LowerHierarchy$BVonly, speciesListName)
+  close(stream)
 }
 
 exportLottery <- function(filename, data, samplingProb, year, schemename, framedesc, speciesListName){

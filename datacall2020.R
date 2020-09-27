@@ -18,10 +18,10 @@ addLotteryMetaInf <- function(lotpar, log){
 #' Add necessary columns for RDBES export
 #' @param assemblage assembalgem to be applied to all stations
 addCols <- function(data, assemblage){
-  data$assembalge <- assemblage
+  data$assemblage <- assemblage
   data$metier5 <- sapply(data$gear, function(x){getMetierLvl5(x, assemblage)})
   data$metier6 <- sapply(data$gear, function(x){getMetierLvl6(x, assemblage)})
-  data$FAOgear <- sapply(data$gear, function(x){getGear(x)})
+  data$FAOgear <- sapply(data$gear, getGear)
   return(data)
 }
 
@@ -129,7 +129,10 @@ lotterydata <- extractFlatBiotic(lotteryMissions, samples)
 exportMonoTargetListLanded(filename = "output/specieslistWHB_HSL.csv", listname = "whbLandedSampling", year= 2019, speciesCode = 126439)
 #whb pel sam
 whbPelSamData <- extractFlatBiotic(whbPelSamMissions, samples)
-exportPelSam("output/pelSamWHB_13.csv", whbPelSamData, 2019, schemename = "pelsam_NOR_WHB", framedesc = "WHB", speciesListName="whbLandedSampling")
+whbPelSamData <- addCols(whbPelSamData, assemblage="SPF")
+whbPelSamData$catchweight[whbPelSamData$catchweight>2e+6] <- 2e+6 #truncate very big catches to fit RDBES integer representation
+exportPelSam("output/pelSamWHB_H13.csv", whbPelSamData, 2019, schemename = "National Routine", framedesc = "WHBps", speciesListName="whbLandedSampling")
+
 #whb lottery
 whbLotteryData <- lotterydata[lotterydata$commonname == "kolmule",]
 whbLotteryData <- addCols(whbLotteryData, assemblage="SPF")
@@ -141,8 +144,9 @@ exportLottery("output/lotteryWHB_H13.csv", whbLotteryData, samplingProb = whbLot
 #
 # MAC
 #
-
 #mac pel sam
 exportMonoTargetListLanded(filename = "output/specieslistMAC_HSL.csv", listname = "macLandedSampling", year= 2019, speciesCode = 127023)
 macPelSamData <- extractFlatBiotic(macPelSamMissions, samples)
-exportPelSam("output/pelSamMAC_13.csv", macPelSamData, 2019, schemename = "pelsam_NOR_MAC", framedesc = "MAC", speciesListName="macLandedSampling")
+macPelSamData <- addCols(macPelSamData, assemblage="SPF")
+macPelSamData$catchweight[macPelSamData$catchweight>2e+6] <- 2e+6  #truncate very big catches to fit RDBES integer representation
+exportPelSam("output/pelSamMAC_H13.csv", macPelSamData, 2019, schemename = "National Routine", framedesc = "MACps", speciesListName="macLandedSampling")
