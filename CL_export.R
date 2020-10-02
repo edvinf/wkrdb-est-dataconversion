@@ -43,7 +43,6 @@ annotateLocodes <- function(landing, komMapping){
 }
 
 annotateAreas <- function(landing, mapping){
-  
   mapping$lok[is.na(mapping$lok)] <- "00"
   landing <- merge(landing, mapping, by.x=c("Hovedområde (kode)", "Lokasjon (kode)"), by.y=c("omr", "lok"), all.x=T)
   stopifnot(all(!is.na(landing$lat)))
@@ -159,7 +158,6 @@ vesselLengthCat <- function(m){
 }
 
 annotate_metier6 <- function(landings, logbooks, metiertableLogbooks, metiertableLandings, target="SPF"){
-  
   stopifnot(all(!is.na(logbooks$RC)))
   rcs <- unique(landings$`Radiokallesignal (seddel)`[!is.na(landings$`Radiokallesignal (seddel)`)])
   
@@ -178,8 +176,9 @@ annotate_metier6 <- function(landings, logbooks, metiertableLogbooks, metiertabl
   landland <- landings[is.na(landings$`Radiokallesignal (seddel)`) | !(landings$`Radiokallesignal (seddel)` %in% rcs),]
   landland$target <- target
   landland <- RstoxFDA::assignMetier(landland, metiertableLandings, "Redskap (kode)", "target", metierColName = "CLmetier6")
+
   landland$target <- NULL
-  
+
   return(rbind(landland, logland))
 }
 
@@ -263,6 +262,7 @@ compileCL <- function(landings, logbooks, meanValues, temporalResolution="Month"
 }
 
 
+
 compileCE <- function(logb, temporalResolution="Month"){
   
   if (temporalResolution=="Quarter"){
@@ -313,6 +313,7 @@ cl <- compileCL(landingsDCannot, logbooksDC, meanValues)
 readr::write_csv(cl, "output/MAC_WHB_HCL.csv", col_names = F)
 
 
+
 #
 # prep CE
 #
@@ -320,6 +321,4 @@ readr::write_csv(cl, "output/MAC_WHB_HCL.csv", col_names = F)
 logbooksAllAnnot <- annotate_assemblage(logbooks, assemblage)
 logbooksAllAnnot$MASKEVIDDE[is.na(logbooksAllAnnot$MASKEVIDDE)] <- 0
 logbooksAllAnnot <- assignMetier(logbooksAllAnnot, logmetier, "REDSKAP_FAO", "assemblage", "MASKEVIDDE", metierColName = "CLmetier6")
-
-
 
