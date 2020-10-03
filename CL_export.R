@@ -1,3 +1,18 @@
+#
+# Notes from CL and CE exercise
+# - metiermapping works satisfactory
+# - LOCODES is a major headache. Note RDBES issue:
+# https://github.com/ices-tools-dev/RDBES/issues/87
+#
+# - Need accurate days at sea for larger vessels. 
+# - Detailed logbook/VMS for CE eskport (dep-messages (trip-start), arrival messages (locodes))
+# - Current compilation done with very dubius days at sea calculation. Fishing days should be OK.
+#
+#
+#
+#
+#
+
 library(RstoxData)
 library(RstoxFDA)
 library(RDBESexchange)
@@ -35,6 +50,12 @@ annotate_assemblage <- function(logbooks, assemblage){
 }
 
 annotateLocodes <- function(landing, komMapping){
+  
+  missing <- unique(landing$Landingskommune[!(landing$Landingskommune %in% komMapping$kommune)])
+  if (length(missing)>1){
+    stop("Not all kommunes are mapped. Missing: ", paste(missing, collapse=", "))
+  }
+  
   landing <- merge(landing, komMapping, by.x="Landingskommune", by.y="kommune", all.x=T)
   landing$locode[is.na(landing$Landingskommune)] <- "*HS-*HS"
   stopifnot(all(!is.na(landing$locode)))
@@ -111,7 +132,7 @@ alpha3tpalpha2 <- Vectorize(alpha3tpalpha2)
 ecoZone <- function(zone){
   eu <- c("XEU")
   coast <- c("NOR", "XSV", "XJM", "GRL", "FRO", "ISL","RUS")
-  int <- c("XRR", "XNW", "XNS", "XBS", "XCA")
+  int <- c("XRR", "XNW", "XNS", "XBS", "XCA", "XNE", "XSI", "XSK")
   if (zone %in% coast){
     return("COAST")
   }
@@ -221,7 +242,7 @@ compileCL <- function(landings, logbooks, meanValues, temporalResolution="Month"
                                CLcommercialSizeCategoryScale="",
                                CLcommercialSizeCategory="",
                                CLnationalFishingActivity="",
-                               CLmetier6="MIS_MIS_0_0_0",
+                               CLmetier6=landings$CLmetier6,
                                CLincidentalByCatchMitigationDevice="Unknown",
                                CLlandingLocation=landings$CLlandingLocation,
                                CLvesselLengthCategory=vesselLengthCat(landings$`Største lengde`),
@@ -261,6 +282,79 @@ compileCL <- function(landings, logbooks, meanValues, temporalResolution="Month"
   return(CL)
 }
 
+#' Not available in compiled logbooks, need to investigate different data source.
+#' This function makes a guess based on date of last catch for a trip and the landing date.
+#' 
+#' The definition of the terms are for RBDES v.18. given in the report from the 2nd workshop of traversel variables
+#' https://op.europa.eu/en/publication-detail/-/publication/8c5583fa-c360-11e6-a6db-01aa75ed71a1
+#' 
+#' days at sea = fishing days + days without fishing
+#' 
+#' fishing days is provided in census.
+#' days without fishing will be assumed to be twice the number of the days without fishing at the end of the trip.
+#' This is identifiable in data if landing date is assumed to be the end of the trip, which is the case for most entries.
+#' It does however introduce large deviations for the few cases when the landing date does not reflect the end of the trip.
+#' 
+#' The dataset contains outliers in this respect that are probably due to erronous recording, or due to 
+#' parts of catch not beeing landed at the end of the trip.
+#' 
+#' For the purposes of this "esimtation" these are excluded baes on the maxDaysAtSea parameter. 
+#' For these the function will let the days without fishing be estimated as the mean of the other ones.
+#' 
+guessDaysAtSea <- function(fishingDays, lastCatchDate, landingDate, maxDaysAtSea=fishingDays*5){
+  daysAfterLastCatch <- as.numeric(difftime(landingDate, lastCatchDate, units = "days"))
+  daysWithoutFishing <- daysAfterLastCatch*2
+  total <- daysWithoutFishing + fishingDays
+  tooLong <- total > maxDaysAtSea
+  
+  if (all(tooLong)){
+    stop("All landing dates were to late after catchdate.")
+  }
+  
+  total[tooLong] <- fishingDays[tooLong] + mean(daysWithoutFishing[!tooLong])
+  return(total)
+}
+
+#' annotate landing infor on logbooks
+annotateLandingInfo <- function(logbooks, landings){
+  stopifnot(all(!is.na(logbooks$RC)))
+  rcs <- unique(logbooks$RC)
+  logland <- landings[!is.na(landings$`Radiokallesignal (seddel)`) & (landings$`Radiokallesignal (seddel)` %in% rcs),]
+  logland$tripid <- paste(logland$`Radiokallesignal (seddel)`, logland$`Siste fangstdato`)
+  logland$trailingDays <- as.numeric(difftime(as.POSIXct(logland$Landingsdato, format="%d.%m.%Y"), logland$`Siste fangstdato`, units="days"))
+  
+  #choose the first landing from the trip to represent the trip
+  logland <- logland[order(logland$trailingDays, decreasing = F),]
+  logland <- logland[!duplicated(logland$tripid),]
+  
+  tripinfo <- logland[,c("tripid", "Landingskommune", "Landingsdato", "Siste fangstdato", "Radiokallesignal (seddel)")]
+  
+  logbooks$tripid <- NA
+  tripinfo <- tripinfo[order(tripinfo$`Siste fangstdato`, decreasing = T),]
+  for (v in unique(logbooks$RC)){
+    print(v)
+    vtrip <- tripinfo[tripinfo$`Radiokallesignal (seddel)`==v,]
+    vesselSel <- logbooks$RC==v
+    for (i in (1:nrow(vtrip))){
+      logbooks$tripid[vesselSel & logbooks$STARTTIDSPUNKT<=vtrip$`Siste fangstdato`[i]] <- vtrip$tripid[i]
+    }
+  }
+  
+  return(merge(logbooks, tripinfo, by="tripid"))
+}
+
+
+annotateTrips <- function(annotatedLogbooks){
+  
+  triptotals <- aggregate(list(totalHauls=annotatedLogbooks$tripid), by=list(tripid=annotatedLogbooks$tripid), FUN=length)
+  
+  annotatedLogbooks <- merge(annotatedLogbooks, triptotals, by="tripid", all.x=T)
+  annotatedLogbooks$CEnumberOfFractionTrips <- 1/annotatedLogbooks$totalHauls
+  
+  return(annotatedLogbooks)
+    
+}
+
 
 
 compileCE <- function(logb, temporalResolution="Month"){
@@ -275,31 +369,124 @@ compileCE <- function(logb, temporalResolution="Month"){
     stop("Temporal resolution", temporalResolution, "not recognized")
   }
   stopifnot("CLmetier6" %in% names(logb))
+  stopifnot("CEnumberOfFractionTrips" %in% names(logb))
+  stopifnot("Landingskommune" %in% names(logb))
   CE <- data.table::data.table(CErecordType=rep("CE", nrow(logb)),
                               CEdataTypeForScientificEffort=rep("Official", nrow(logb)),
-                              CEdataSourceForScientificEffort=rep("Logbook", nrow(logb)),
+                              CEdataSourceForScientificEffort=rep("Combcd", nrow(logb)),
                               CEnationalProgramBehScientificEffort=rep("", nrow(logb)),
                               CEvesselFlagCountry=rep("NO", nrow(logb)),
                               CEyear=logb$FANGSTÅR,
                               CEquarter=substr(quarters(logb$STARTTIDSPUNKT, F),2,2),
                               CEmonth=as.integer(month),
                               CEArea=RDBESexchange::getDCRareaLvl3(logb$START_LT, logb$START_LG),
-                              CEStatisticalRectangle=RDBESexchange::getDCRareaLvlt(logb$START_LT, logb$START_LG),
+                              CEStatisticalRectangle=RDBESexchange::getDCRareaLvl5(logb$START_LT, logb$START_LG),
                               CEgsaSubarea=RDBESexchange::getgsaSubArea(logb$START_LT, logb$START_LG),
                               CEjurisdictionArea=rep("",nrow(logb)),
                               CEexclusiveEconomicZoneIndicator=ecoZone(logb$SONE),
                               CEnationalFishingActivity=rep("",nrow(logb)),
                               CEmetier6=logb$CLmetier6,
                               CEincidentalByCatchMitigationDevice="Unknown",
-                              CElandingLocation="*HS-*HS",
+                              CElandingLocation=logb$CLlandingLocation,
                               CEvesselLengthCategory=vesselLengthCat(logb$STØRSTE_LENGDE),
                               CEfishingTechnique="",
                               CEdeepSeaRegulation=""
                                 
         )
-  stop("Implement the rest")
+  
+  aggVars <- list()
+  for (n in names(CE)){
+    aggVars[[n]] <- CE[[n]]
+  }
+  
+  #
+  # set trips
+  #
+  
+  #get fractional trips
+  CEbuild <- aggregate(list(CEnumberOfFractionTrips=logb$CEnumberOfFractionTrips), by=aggVars, FUN=sum)
+  CEbuild$CEnumberOfFractionTrips <- RDBESexchange:::fdecimal(CEbuild$CEnumberOfFractionTrips, 2)
+    
+  #get dominant trips
+  hc <- CE
+  hc$tripid <- logb$tripid
+  haulCount <- aggregate(list(haulsInCell=hc$tripid), by=append(aggVars, list(tripid=hc$tripid)), FUN=length) 
+  haulCount <- haulCount[order(haulCount$haulsInCell, decreasing = T),]
+  haulCount <- haulCount[!duplicated(haulCount$tripid),] #keep only one cell pr tripid
+  haulCount$CEnumberOfDominantTrips <-1
+  
+  aggVarsHC <- list()
+  for (cn in names(CE)){
+    aggVarsHC[[cn]] <- haulCount[[cn]]
+  }
+  
+  domTripCE <- aggregate(list(CEnumberOfDominantTrips=haulCount$CEnumberOfDominantTrips), by=aggVarsHC, FUN=sum)
+  CEbuild <- merge(CEbuild, domTripCE, by=names(aggVars), all.x=T)
+  CEbuild$CEnumberOfDominantTrips[is.na(CEbuild$CEnumberOfDominantTrips)] <- 0
+
+  #get days at sea
+  logb$fishingDates <- paste(logb$RC, substr(logb$STARTTIDSPUNKT,1,10))
+  fishingDaysPrTrip <- aggregate(list(fishingDaysOnTrip=logb$fishingDates), by=list(tripid=logb$tripid), FUN=function(x){length(unique(x))})
+  trips <- logb[!duplicated(logb$tripid),]
+  trips <- merge(trips, fishingDaysPrTrip)
+  trips$totalDaysOnTrip <- guessDaysAtSea(trips$fishingDaysOnTrip, lastCatchDate = trips$`Siste fangstdato`, landingDate = as.POSIXct(trips$Landingsdato, format="%d.%m.%Y"))
+  logb <- merge(logb, trips[,c("tripid", "totalDaysOnTrip", "fishingDaysOnTrip")], by="tripid", all.x=T)
+  daysAtSeaCE <- aggregate(list(CEofficialDaysAtSea=logb$CEnumberOfFractionTrips*logb$totalDaysOnTrip), by=aggVars, FUN=sum)
+  CEbuild <- merge(CEbuild, daysAtSeaCE, by=names(aggVars))
+  CEbuild$CEofficialDaysAtSea <- RDBESexchange:::fdecimal(CEbuild$CEofficialDaysAtSea, 2)
+  CEbuild$CEScientificDaysAtSea <- CEbuild$CEofficialDaysAtSea
+  
+  #get fishing days
+  fishingDaysCE <- aggregate(list(CEofficialFishingDays=logb$fishingDates), by=aggVars, FUN=function(x){length(unique(x))})  
+  CEbuild <- merge(CEbuild, fishingDaysCE, by=names(aggVars))
+  CEbuild$CEofficialFishingDays <- RDBESexchange:::fdecimal(CEbuild$CEofficialFishingDays, 2)
+  CEbuild$CEscientificFishingDays <- CEbuild$CEofficialFishingDays
+
+  CEbuild$CEofficialNumberOfHaulsOrSets <- ""
+  CEbuild$CEScientificNumberOfHaulsOrSets <- ""
+  CEbuild$CEofficialVesselFishingHour <- ""
+  CEbuild$CEscientificVesselFishingHour <- ""
+  CEbuild$CEofficialSoakingMeterHour <- ""
+  CEbuild$CEscientificSoakingMeterHour <- ""
+  
+  #get kw days at sea, convert from hp by /1,36
+  kwDaysCE <- aggregate(list(CEofficialkWDaysAtSea=logb$MOTORKRAFT*logb$CEnumberOfFractionTrips*logb$totalDaysOnTrip/1.36), by=aggVars, FUN=sum)
+  CEbuild <- merge(CEbuild, kwDaysCE, by=names(aggVars))
+  CEbuild$CEofficialkWDaysAtSea <- round(CEbuild$CEofficialkWDaysAtSea)
+  CEbuild$CEscientifickWDaysAtSea <- CEbuild$CEofficialkWDaysAtSea
+  
+  #get kw fishing days, convert from hp by /1,36
+  kwDaysCE <- aggregate(list(CEofficialkWFishingDays=logb$MOTORKRAFT*logb$CEnumberOfFractionTrips*logb$fishingDaysOnTrip/1.36), by=aggVars, FUN=sum)
+  CEbuild <- merge(CEbuild, kwDaysCE, by=names(aggVars))
+  CEbuild$CEofficialkWFishingDays <- round(CEbuild$CEofficialkWFishingDays)
+  CEbuild$CEscientifickWFishingDays <- CEbuild$CEofficialkWFishingDays
+  
+  CEbuild$CEOfficialkWFishingHours <- ""
+  CEbuild$CEscientifickWFishingHours <- ""
+  
+  #get GT days at sea
+  kwDaysCE <- aggregate(list(CEgTDaysAtSea=logb$BRUTTOTONNASJE*logb$CEnumberOfFractionTrips*logb$totalDaysOnTrip), by=aggVars, FUN=sum)
+  CEbuild <- merge(CEbuild, kwDaysCE, by=names(aggVars))
+  CEbuild$CEgTDaysAtSea <- round(CEbuild$CEgTDaysAtSea)
+  
+  #get GT fishing days
+  kwDaysCE <- aggregate(list(CEgTFishingDays=logb$BRUTTOTONNASJE*logb$CEnumberOfFractionTrips*logb$fishingDaysOnTrip), by=aggVars, FUN=sum)
+  CEbuild <- merge(CEbuild, kwDaysCE, by=names(aggVars))
+  CEbuild$CEgTFishingDays <- round(CEbuild$CEgTFishingDays)
+  
+  CEbuild$CEgTFishingHours <- ""
+  
+  #get unique vessels
+  uniqueVessels <- aggregate(list(CEnumberOfUniqueVessels=logb$RC), by=aggVars, FUN=function(x){length(unique(x))})
+  CEbuild <- merge(CEbuild, uniqueVessels, by=names(aggVars))
+  
+  CEbuild$CEscientificFishingDaysRSE <- ""
+  CEbuild$CEscientificFishingDaysQualitativeBias <- ""
+  
   warning("Assuming no CEjurisdictionArea. Assuming no CEdeepSeaRegulation.")
-  browser()
+  warning("Days at sea is computed very approximately")
+  
+  return(CEbuild)
 }
 
 #
@@ -321,4 +508,10 @@ readr::write_csv(cl, "output/MAC_WHB_HCL.csv", col_names = F)
 logbooksAllAnnot <- annotate_assemblage(logbooks, assemblage)
 logbooksAllAnnot$MASKEVIDDE[is.na(logbooksAllAnnot$MASKEVIDDE)] <- 0
 logbooksAllAnnot <- assignMetier(logbooksAllAnnot, logmetier, "REDSKAP_FAO", "assemblage", "MASKEVIDDE", metierColName = "CLmetier6")
-
+#restrict to only the metiers that landings are provided for
+logbooksLandedMetiers <- logbooksAllAnnot[logbooksAllAnnot$CLmetier6 %in% unique(cl$CLmetier6),]
+logbooksLandedMetiers <- annotateLandingInfo(logbooksLandedMetiers, landings)
+logbooksLandedMetiers <- annotateLocodes(logbooksLandedMetiers, locodesKommune)
+logbooksLandedMetiers <- annotateTrips(logbooksLandedMetiers)
+ce <- compileCE(logbooksLandedMetiers)
+readr::write_csv(ce, "output/effort_MAC_WHB_metiers_HCE.csv", col_names = F)
