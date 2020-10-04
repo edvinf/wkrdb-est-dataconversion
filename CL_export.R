@@ -345,8 +345,9 @@ annotateLandingInfo <- function(logbooks, landings){
 
 
 annotateTrips <- function(annotatedLogbooks){
-  
-  triptotals <- aggregate(list(totalHauls=annotatedLogbooks$tripid), by=list(tripid=annotatedLogbooks$tripid), FUN=length)
+  warning("Distributes fraction days by haul for all gears. Should be effort variable.")
+  annotatedLogbooks$haulid <- paste(annotatedLogbooks$RC, annotatedLogbooks$STARTTIDSPUNKT, sep="/")
+  triptotals <- aggregate(list(totalHauls=annotatedLogbooks$haulid), by=list(tripid=annotatedLogbooks$tripid), FUN=function(x){length(unique(x))})
   
   annotatedLogbooks <- merge(annotatedLogbooks, triptotals, by="tripid", all.x=T)
   annotatedLogbooks$CEnumberOfFractionTrips <- 1/annotatedLogbooks$totalHauls
@@ -358,6 +359,16 @@ annotateTrips <- function(annotatedLogbooks){
 
 
 compileCE <- function(logb, temporalResolution="Month"){
+  
+  if (any(is.na(logb$MOTORKRAFT))){
+    warning("Setting engine power mean for vessels with missing engine power")
+    logb$MOTORKRAFT[is.na(logb$MOTORKRAFT)] <- mean(logb$MOTORKRAFT[!is.na(logb$MOTORKRAFT)])
+  }
+  if (any(is.na(logb$BRUTTOTONNASJE))){
+    warning("Setting engine gross tonnage to mean for vessels with missing gross tonnage")
+    logb$BRUTTOTONNASJE[is.na(logb$BRUTTOTONNASJE)] <- mean(logb$BRUTTOTONNASJE[!is.na(logb$BRUTTOTONNASJE)])    
+  }
+
   
   if (temporalResolution=="Quarter"){
     month <- rep("", nrow(logb))
@@ -410,7 +421,8 @@ compileCE <- function(logb, temporalResolution="Month"){
   #get dominant trips
   hc <- CE
   hc$tripid <- logb$tripid
-  haulCount <- aggregate(list(haulsInCell=hc$tripid), by=append(aggVars, list(tripid=hc$tripid)), FUN=length) 
+  hc$haulid <- logb$haulid
+  haulCount <- aggregate(list(haulsInCell=hc$haulid), by=append(aggVars, list(tripid=hc$tripid)), FUN=function(x){length(unique(x))}) 
   haulCount <- haulCount[order(haulCount$haulsInCell, decreasing = T),]
   haulCount <- haulCount[!duplicated(haulCount$tripid),] #keep only one cell pr tripid
   haulCount$CEnumberOfDominantTrips <-1
