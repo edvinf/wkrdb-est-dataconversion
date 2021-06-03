@@ -301,6 +301,8 @@ obs <- c(RDBESexchange:::codelist$RS_BiologicalMeasurementType$length, RDBESexch
 #' @param agingstructure agingstructure for sample, can be NULL if age is not amonv fishobservations
 exportBVunstratified <- function(stream, individuals, nmdbiotic, fishobservations=obs, agingstructure=NULL){
   
+  stop("Selection methods were wrong for some parameters in the data exported for the 2020 data call. Fix!")
+  
   individuals <- individuals[order(individuals$specimenid),]
   
   if (nrow(individuals)<1){
