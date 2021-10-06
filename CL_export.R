@@ -17,10 +17,10 @@ library(RstoxData)
 library(RstoxFDA)
 library(RDBESexchange)
 library(readr)
-landings <- RstoxData::readLssFile("~/landingsets/LSS/FDIR_HI_LSS_FANGST_2019_PR_2020-03-03.psv")
-logbooks <- RstoxData::readErsFile("~/logbooks/FDIR_HI_ERS_2019_PR_2020-03-04.psv")
+landings <- RstoxData::readLssFile("~/landingsets/LSS/FDIR_HI_LSS_FANGST_2020_PR_2021-03-03.psv")
+logbooks <- RstoxData::readErsFile("~/logbooks/FDIR_HI_ERS_2020_PR_2021-03-03.psv")
 
-dc_species <- c("MAC", "WHB")
+dc_species <- c("MAC", "WHB") #keeping only MAC and WHB as locodes list have yet to be made for all landings.
 landingsDC <- landings[(landings$`Art FAO (kode)` %in% dc_species) & landings$`Fartøynasjonalitet (kode)`=="NOR" & landings$Rundvekt > 0,]
 logbooksDC <- logbooks[logbooks$FANGSTART_FAO %in% dc_species,]
 
@@ -186,7 +186,7 @@ annotate_metier6 <- function(landings, logbooks, metiertableLogbooks, metiertabl
   #landings with corresponding logbooks
   logbooks$target <- target
   logland <- landings[!is.na(landings$`Radiokallesignal (seddel)`) & (landings$`Radiokallesignal (seddel)` %in% rcs),]
-  logbooks <- RstoxFDA::assignMetier(logbooks, metiertableLogbooks, "REDSKAP_FAO", "target", "MASKEVIDDE", metierColName = "CLmetier6")
+  logbooks <- RstoxFDA::appendMetier(logbooks, metiertableLogbooks, "REDSKAP_FAO", "target", "MASKEVIDDE", metierColName = "CLmetier6")
   logbooks$gearid <- paste(logbooks$RC, logbooks$REDSKAP_NS)
   logbooks <- logbooks[!duplicated(logbooks$gearid),c("gearid", "CLmetier6")]
   logland$gearid <- paste(logland$`Radiokallesignal (seddel)`, logland$`Redskap (kode)`)
@@ -196,7 +196,7 @@ annotate_metier6 <- function(landings, logbooks, metiertableLogbooks, metiertabl
   #landings without corresponding logbooks
   landland <- landings[is.na(landings$`Radiokallesignal (seddel)`) | !(landings$`Radiokallesignal (seddel)` %in% rcs),]
   landland$target <- target
-  landland <- RstoxFDA::assignMetier(landland, metiertableLandings, "Redskap (kode)", "target", metierColName = "CLmetier6")
+  landland <- RstoxFDA::appendMetier(landland, metiertableLandings, "Redskap (kode)", "target", metierColName = "CLmetier6")
 
   landland$target <- NULL
 
@@ -239,6 +239,7 @@ compileCL <- function(landings, logbooks, meanValues, temporalResolution="Month"
                                CLspeciesFaoCode=landings$`Art FAO (kode)`,
                                CLlandingCategory=usage(landings$`Anvendelse hovedgruppe (kode)`),
                                CLcatchCategory="Lan",
+                               CLregDisCategory="",
                                CLcommercialSizeCategoryScale="",
                                CLcommercialSizeCategory="",
                                CLnationalFishingActivity="",
@@ -509,7 +510,7 @@ landingsDCannot <- annotateAreas(landingsDC, posImp)
 landingsDCannot <- annotateLocodes(landingsDCannot, locodesKommune)
 landingsDCannot <- annotate_metier6(landingsDCannot, logbooksDC, logmetier, landmetier)
 cl <- compileCL(landingsDCannot, logbooksDC, meanValues)
-readr::write_csv(cl, "output/MAC_WHB_HCL.csv", col_names = F)
+readr::write_csv(cl, "output/MAC_WHB_HCL_2020.csv", col_names = F)
 
 
 
@@ -519,11 +520,11 @@ readr::write_csv(cl, "output/MAC_WHB_HCL.csv", col_names = F)
 
 logbooksAllAnnot <- annotate_assemblage(logbooks, assemblage)
 logbooksAllAnnot$MASKEVIDDE[is.na(logbooksAllAnnot$MASKEVIDDE)] <- 0
-logbooksAllAnnot <- assignMetier(logbooksAllAnnot, logmetier, "REDSKAP_FAO", "assemblage", "MASKEVIDDE", metierColName = "CLmetier6")
+logbooksAllAnnot <- appendMetier(logbooksAllAnnot, logmetier, "REDSKAP_FAO", "assemblage", "MASKEVIDDE", metierColName = "CLmetier6")
 #restrict to only the metiers that landings are provided for
 logbooksLandedMetiers <- logbooksAllAnnot[logbooksAllAnnot$CLmetier6 %in% unique(cl$CLmetier6),]
 logbooksLandedMetiers <- annotateLandingInfo(logbooksLandedMetiers, landings)
 logbooksLandedMetiers <- annotateLocodes(logbooksLandedMetiers, locodesKommune)
 logbooksLandedMetiers <- annotateTrips(logbooksLandedMetiers)
 ce <- compileCE(logbooksLandedMetiers)
-readr::write_csv(ce, "output/effort_MAC_WHB_metiers_HCE.csv", col_names = F)
+readr::write_csv(ce, "output/effort_MAC_WHB_metiers_HCE_2020.csv", col_names = F)
