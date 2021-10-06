@@ -510,7 +510,7 @@ landingsDCannot <- annotateAreas(landingsDC, posImp)
 landingsDCannot <- annotateLocodes(landingsDCannot, locodesKommune)
 landingsDCannot <- annotate_metier6(landingsDCannot, logbooksDC, logmetier, landmetier)
 cl <- compileCL(landingsDCannot, logbooksDC, meanValues)
-readr::write_csv(cl, "output/MAC_WHB_HCL_2020.csv", col_names = F)
+readr::write_csv(cl, "output/MAC_WHB_2020_HCL.csv", col_names = F)
 
 
 
@@ -527,4 +527,4 @@ logbooksLandedMetiers <- annotateLandingInfo(logbooksLandedMetiers, landings)
 logbooksLandedMetiers <- annotateLocodes(logbooksLandedMetiers, locodesKommune)
 logbooksLandedMetiers <- annotateTrips(logbooksLandedMetiers)
 ce <- compileCE(logbooksLandedMetiers)
-readr::write_csv(ce, "output/effort_MAC_WHB_metiers_HCE_2020.csv", col_names = F)
+readr::write_csv(ce, "output/effort_MAC_WHB_metiers_2020_HCE.csv", col_names = F)
