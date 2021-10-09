@@ -77,10 +77,10 @@ getMetierLvl6 <- function(NMDreferenceGearCode, targetAssemblage){
     return(paste(gear, targetAssemblage, meshrange, seldev, seldevmesh, sep="_"))  
   }
   else if (!is.na(gear) & !is.na(targetAssemblage) & !is.na(seldev)){
-    return(paste(gear, targetAssemblage, "0", seldev, "0", sep="_"))  
+    return(paste(gear, targetAssemblage, ">0", seldev, "0", sep="_"))  
   }
   else if (!is.na(gear) & !is.na(targetAssemblage)){
-    return(paste(gear, targetAssemblage, "0", "0", "0", sep="_"))  
+    return(paste(gear, targetAssemblage, ">0", "0", "0", sep="_"))  
   }
   else{
     return(NA)
@@ -109,6 +109,9 @@ getGear <- function(NMDreferenceGearCode){
   }
   if (NMDreferenceGearCode %in% c(3600)){
     return(RDBESexchange:::codelist$GearType$demershalseine)
+  }
+  if (NMDreferenceGearCode %in% c(3100)){
+    return(RDBESexchange:::codelist$GearType$bottomtrawl)
   }
   if (NMDreferenceGearCode %in% c(3700)){
     return(RDBESexchange:::codelist$GearType$purseseine)
@@ -147,6 +150,9 @@ getMeshSize <- function(NMDreferenceGearCode){
     return(NA)
   }
   if (NMDreferenceGearCode %in% c(3600)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(3100)){
     return(NA)
   }
   if (NMDreferenceGearCode %in% c(3700)){
@@ -191,6 +197,9 @@ getSelDev <- function(NMDreferenceGearCode){
   if (NMDreferenceGearCode %in% c(3600)){
     return(NA)
   }
+  if (NMDreferenceGearCode %in% c(3100)){
+    return(NA)
+  }
   if (NMDreferenceGearCode %in% c(3700)){
     return(NA)
   }
@@ -233,6 +242,9 @@ getSelDevMeshSize <- function(NMDreferenceGearCode){
     return(NA)
   }
   if (NMDreferenceGearCode %in% c(3600)){
+    return(NA)
+  }
+  if (NMDreferenceGearCode %in% c(3100)){
     return(NA)
   }
   if (NMDreferenceGearCode %in% c(3700)){

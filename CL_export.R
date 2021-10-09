@@ -1,6 +1,6 @@
 #
 # Notes from CL and CE exercise
-# - metiermapping works satisfactory
+# - metiermapping works satisfactory, but could possibly be simplified for the new metier codes.
 # - LOCODES is a major headache. Note RDBES issue:
 # https://github.com/ices-tools-dev/RDBES/issues/87
 #

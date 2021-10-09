@@ -238,6 +238,10 @@ exportSA <- function(stream, catchsamples, lower_hierarchy, catchfraction, seqnr
   catches <- catchsamples[!duplicated(catchsamples$catchsampleid)]
   
   for (i in 1:nrow(catches)){
+    
+    SAstateOfProc <- RDBESexchange:::codelist$StateOfProcessing$fresh
+    warning("setting stateofProc to fre as default")
+    
     presentation <- getPresentation(catches$sampleproducttype[i]) 
     if (presentation==RDBESexchange:::codelist$RS_Presentation$whole){
       conv_factor <- NA
@@ -268,6 +272,7 @@ exportSA <- function(stream, catchsamples, lower_hierarchy, catchfraction, seqnr
                            SAseqNum=seqnr,
                            SAunitName=catchsamples$catchsampleid[i],
                            SAspeCode=catchsamples$aphia[i],
+                           SAstateOfProc=SAstateOfProc,
                            SApres=presentation,
                            SAspecState=RDBESexchange:::codelist$RS_SpecimensState$Dead,
                            SAcatchCat=catchfraction,
@@ -379,6 +384,14 @@ exportBVunstratified <- function(stream, individuals, fishobservations=obs, agin
     return()
   }
   
+  BVtypeAssess <- "Age"
+  BVconFacAssess <- 1
+  warning("Setting BVtypeAssess to Age and BVconFacAssess to 1")
+  
+  BVstateOfProc <- RDBESexchange:::codelist$StateOfProcessing$defrosted
+  BVpres <- RDBESexchange:::codelist$RS_Presentation$whole
+  warning("Setting state of proc to defrosted and pres to whole on BV table")
+  
   for (i in 1:nrow(individuals)){
     
     # for generalization consider
@@ -399,11 +412,16 @@ exportBVunstratified <- function(stream, individuals, fishobservations=obs, agin
                                  BVunitName = fishnumber,
                                  BVtype = RDBESexchange:::codelist$RS_BiologicalMeasurementType$age,
                                  BVvalue = individuals$age[i],
-                                 BVvalTyp = "Year",
+                                 BVvalTyp = RDBESexchange:::codelist$RS_UnitOfValue$year,
                                  BVmethod = getRDBESagingMethod(agingstructure),
                                  BVnumTotal = nrow(individuals),
                                  BVnumSamp = sum(!is.na(individuals$age)),
-                                 BVsampler = sampler)
+                                 BVsampler = sampler,
+                                 BVtypeAssess = BVtypeAssess,
+                                 BVconFacAssess=BVconFacAssess,
+                                 BVcertaintyQuali=RDBESexchange:::codelist$MeasurementCertainty$Unknown,
+                                 BVstateOfProc=BVstateOfProc,
+                                 BVpres=BVpres)
         }
       } else if (p==RDBESexchange:::codelist$RS_BiologicalMeasurementType$length){
         if (!is.na(individuals[i,"length"])){
@@ -415,7 +433,12 @@ exportBVunstratified <- function(stream, individuals, fishobservations=obs, agin
                                  BVvalTyp = RDBESexchange:::codelist$RS_UnitOfValue$mm,
                                  BVnumTotal = nrow(individuals),
                                  BVnumSamp = sum(!is.na(individuals$length)),
-                                 BVsampler = sampler)
+                                 BVsampler = sampler,
+                                 BVtypeAssess = BVtypeAssess,
+                                 BVconFacAssess=BVconFacAssess,
+                                 BVcertaintyQuali=RDBESexchange:::codelist$MeasurementCertainty$NotApp,
+                                 BVstateOfProc=BVstateOfProc,
+                                 BVpres=BVpres)
         }
       } else if (p==RDBESexchange:::codelist$RS_BiologicalMeasurementType$weight){
         if (!is.na(individuals[i,"individualweight"])){
@@ -427,7 +450,12 @@ exportBVunstratified <- function(stream, individuals, fishobservations=obs, agin
                                  BVvalTyp = RDBESexchange:::codelist$RS_UnitOfValue$g,
                                  BVnumTotal = nrow(individuals),
                                  BVnumSamp = sum(!is.na(individuals$length)),
-                                 BVsampler = sampler)
+                                 BVsampler = sampler,
+                                 BVtypeAssess = BVtypeAssess,
+                                 BVconFacAssess=BVconFacAssess,
+                                 BVcertaintyQuali=RDBESexchange:::codelist$MeasurementCertainty$NotApp,
+                                 BVstateOfProc=BVstateOfProc,
+                                 BVpres=BVpres)
         }
       } else if (p==RDBESexchange:::codelist$RS_BiologicalMeasurementType$sex){
         if (!is.na(individuals[i,"sex"])){
@@ -444,9 +472,9 @@ exportBVunstratified <- function(stream, individuals, fishobservations=obs, agin
 
 
 exportPelSamDE <- function(stream, samplingschemename, samplingframedesc, year){
-  RDBESexhange::writeDE(stream, 
+  RDBESexchange::writeDE(stream, 
                         DEsampScheme = samplingschemename,
-                        DEsampSchemeType = RDBESexchange:::codelist$RS_samplingSchemeType$nationalPilot,
+                        DEsampSchemeType = RDBESexchange:::codelist$RS_samplingSchemeType$nationalMonitoring,
                         DEyear = year,
                         DEstratumName = samplingframedesc,
                         DEhierarchyCor = RDBESexchange:::codelist$YesNoFields$no, 
@@ -455,14 +483,14 @@ exportPelSamDE <- function(stream, samplingschemename, samplingframedesc, year){
 }
 
 exportLotterySD <- function(stream, samplingcountry=RDBESexchange:::codelist$ISO_3166$norway, samplinginstitution=RDBESexchange:::codelist$EDMO$IMR){
-  RDBESexhange::writeSD(stream,
+  RDBESexchange::writeSD(stream,
                         SDctry = RDBESexchange:::codelist$ISO_3166$norway,
                         SDinst = RDBESexchange:::codelist$EDMO$IMR
   )
 }
 
 exportPelSamSD <- function(stream, samplingcountry=RDBESexchange:::codelist$ISO_3166$norway, samplinginstitution=RDBESexchange:::codelist$EDMO$IMR){
-  RDBESexhange::writeSD(stream,
+  RDBESexchange::writeSD(stream,
                         SDctry = RDBESexchange:::codelist$ISO_3166$norway,
                         SDinst = RDBESexchange:::codelist$EDMO$IMR
   )
@@ -472,9 +500,9 @@ exportPelSamSD <- function(stream, samplingcountry=RDBESexchange:::codelist$ISO_
 # Lottery-sampling specific functions
 #
 exportLotteryDE <- function(stream, samplingschemename, samplingframedesc, year){
-  RDBESexhange::writeDE(stream, 
+  RDBESexchange::writeDE(stream, 
                         DEsampScheme = samplingschemename,
-                        DEsampSchemeType = RDBESexchange:::codelist$RS_samplingSchemeType$nationalPilot,
+                        DEsampSchemeType = RDBESexchange:::codelist$RS_samplingSchemeType$nationalMonitoring,
                         DEyear = year,
                         DEstratumName = samplingframedesc,
                         DEhierarchyCor = RDBESexchange:::codelist$YesNoFields$yes, 
@@ -486,7 +514,7 @@ exportLotteryDE <- function(stream, samplingschemename, samplingframedesc, year)
 #' @param samplingcounty consult RDBES documentatino
 #' @param samplinginstitution consult RDBES documentatino
 exportLotterySD <- function(stream, samplingcountry=RDBESexchange:::codelist$ISO_3166$norway, samplinginstitution=RDBESexchange:::codelist$EDMO$IMR){
-  RDBESexhange::writeSD(stream,
+  RDBESexchange::writeSD(stream,
                         SDctry = RDBESexchange:::codelist$ISO_3166$norway,
                         SDinst = RDBESexchange:::codelist$EDMO$IMR
   )
@@ -504,6 +532,11 @@ exportLotterySD <- function(stream, samplingcountry=RDBESexchange:::codelist$ISO
 #' @param targetAssemblageFunction function for assigning target assemblage, described by the target function assemblage contract in metierannotatin.R
 exportLotteryFO <- function(stream, flatnmdbiotic, lower_hierarchy, samplingProb, specieslistname){
   
+  if (nrow(samplingProb) == 0){
+    stop("samplingProb cannot be an empty data frame")
+  }
+  
+  stopifnot(is.na(samplingProb$serialnumber) | (samplingProb$serialnumber %in% flatnmdbiotic$serialnumber))
   
   stations <- flatnmdbiotic[!duplicated(flatnmdbiotic$serialnumber),]
   stations <- merge(samplingProb, stations, all.x=T, by="serialnumber")
@@ -514,6 +547,7 @@ exportLotteryFO <- function(stream, flatnmdbiotic, lower_hierarchy, samplingProb
     
     #nonresponse
     if (is.na(stations$serialnumber[i])){
+      if (!is.na(stations$START_LT[i]) & !is.na(stations$START_LG[i])){
       RDBESexchange::writeFO(stream,
                              FOseqNum = seqnr,
                              FOunitName = stations$unitname[i],
@@ -524,11 +558,12 @@ exportLotteryFO <- function(stream, flatnmdbiotic, lower_hierarchy, samplingProb
                              FOselectMeth = RDBESexchange:::codelist$RS_SelectionMethod$UPSWOR, 
                              FOsampler = RDBESexchange:::codelist$RS_Sampler$self,
                              FOcatReg = RDBESexchange:::codelist$RS_CatchRegistration$landed, 
-                             FOobsCo = RDBESexchange:::codelist$RS_ObservationCode$hauling, 
+                             FOobsCo = RDBESexchange:::codelist$ObservationCode$NotRecorded,
                              FOmetier5 = "MIS_MIS",
                              FOmetier6 = "MIS_MIS_0_0_0",
                              FOgear = "MIS", 
                              FOincBycMitigDev = "Unknown",
+                             FOdurationSource = RDBESexchange:::codelist$DurationSource$other,
                              FOstopLat = NA,
                              FOstopLon = NA,
                              FOendDate = stations$datekey[i],
@@ -543,6 +578,7 @@ exportLotteryFO <- function(stream, flatnmdbiotic, lower_hierarchy, samplingProb
                              FOtarget = NA,
                              FOsamp = RDBESexchange:::codelist$YesNoFields$no
       )
+      }
     }
     else{
       fdirarea <- NA
@@ -558,12 +594,18 @@ exportLotteryFO <- function(stream, flatnmdbiotic, lower_hierarchy, samplingProb
       #}
       
       stoplon <- stations$longitudeend[i]
-      if (!is.na(stoplon)){
-        stoplon <- stoplon
+      if (is.na(stoplon)){
+        stoplon <- stations$longitudestart[i]
       }
       stoplat <-stations$latitudeend[i]
-      if (!is.na(stoplat)){
-        stoplat <- stoplat
+      if (is.na(stoplat)){
+        stoplat <- stations$latitudestart[i]
+      }
+      
+      message(stations$serialnumber[i])
+      
+      if (is.na(stoplat)){
+        browser()
       }
       
       RDBESexchange::writeFO(stream,
@@ -576,11 +618,12 @@ exportLotteryFO <- function(stream, flatnmdbiotic, lower_hierarchy, samplingProb
                              FOselectMeth = RDBESexchange:::codelist$RS_SelectionMethod$UPSWOR, 
                              FOsampler = RDBESexchange:::codelist$RS_Sampler$self,
                              FOcatReg = RDBESexchange:::codelist$RS_CatchRegistration$landed, 
-                             FOobsCo = RDBESexchange:::codelist$RS_ObservationCode$hauling, 
+                             FOobsCo = RDBESexchange:::codelist$ObservationCode$pumping, 
                              FOmetier5 = stations$metier5[i],
                              FOmetier6 = stations$metier6[i],
                              FOgear = stations$FAOgear[i], 
-                             FOincBycMitigDev = "Unknown",
+                             FOincidentalByCatchMitigationDeviceFirst = "Unknown",
+                             FOdurationSource = RDBESexchange:::codelist$DurationSource$other,
                              FOstopLat = stoplat,
                              FOstopLon = stoplon,
                              FOendDate = substring(stations$stationstartdate[i], 1, 10),#mandatory, provide start date for now.
@@ -651,7 +694,7 @@ exportPelSamFO <- function(stream, flatnmdbiotic, lower_hierarchy, specieslistna
                              FOmetier5 = stations$metier5[i],
                              FOmetier6 = stations$metier6[i],
                              FOgear = stations$FAOgear[i], 
-                             FOincBycMitigDev = "Unknown",
+                             FOincidentalByCatchMitigationDeviceFirst = "Unknown",
                              FOstopLat = stoplat,
                              FOstopLon = stoplon,
                              FOendDate = substring(stations$stationstartdate[i], 1, 10),#mandatory, provide start date for now.
@@ -678,7 +721,7 @@ exportPelSamFO <- function(stream, flatnmdbiotic, lower_hierarchy, specieslistna
 
 exportLotterySS <- function(stream, specieslistname){
   RDBESexchange::writeSS(stream, SSseqNum=1, 
-                         SSobsActTyp=RDBESexchange:::codelist$RS_ObservationActivityCode$haul,
+                         SSobsActTyp=RDBESexchange:::codelist$ObservationActivityType$Presort,
                          SScatchFra=RDBESexchange:::codelist$RS_CatchRegistration$landed,
                          SSobsTyp=RDBESexchange:::codelist$RS_ObservationType$volume,
                          SSsampler=RDBESexchange:::codelist$RS_Sampler$self,

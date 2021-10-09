@@ -378,7 +378,7 @@ exportBVunstratified <- function(stream, individuals, nmdbiotic, fishobservation
 # Lottery-sampling specific functions
 #
 exportLotteryDE <- function(stream, samplingschemename, samplingframedesc, year){
-  RDBESexhange::writeDE(stream, 
+  RDBESexchange::writeDE(stream, 
                         DEsampScheme = samplingschemename,
                         DEsampSchemeType = RDBESexchange:::codelist$RS_samplingSchemeType$nationalPilot,
                         DEyear = year,
@@ -392,7 +392,7 @@ exportLotteryDE <- function(stream, samplingschemename, samplingframedesc, year)
 #' @param samplingcounty consult RDBES documentatino
 #' @param samplinginstitution consult RDBES documentatino
 exportLotterySD <- function(stream, samplingcountry=RDBESexchange:::codelist$ISO_3166$norway, samplinginstitution=RDBESexchange:::codelist$EDMO$IMR){
-  RDBESexhange::writeSD(stream,
+  RDBESexchange::writeSD(stream,
                         SDctry = RDBESexchange:::codelist$ISO_3166$norway,
                         SDinst = RDBESexchange:::codelist$EDMO$IMR
                         )
